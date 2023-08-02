@@ -1,15 +1,15 @@
 package com.lovelycatv.arkdatabase.runtime.constructures;
 
-import com.lovelycatv.arkdatabase.runtime.constructures.base.RelationalDataBase;
-import com.lovelycatv.arkdatabase.runtime.constructures.base.interfaces.RelationalExecuteCallBack;
-import com.lovelycatv.arkdatabase.runtime.constructures.base.interfaces.RelationalExecuteQueryCallBack;
+import com.lovelycatv.arkdatabase.runtime.constructures.base.relational.RelationalDatabase;
+import com.lovelycatv.arkdatabase.runtime.constructures.base.relational.interfaces.RelationalExecuteCallBack;
+import com.lovelycatv.arkdatabase.runtime.constructures.base.relational.interfaces.RelationalExecuteQueryCallBack;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public final class MySQLManager extends RelationalDataBase {
+public final class MySQLManager extends RelationalDatabase {
     public static final String AUTO_INCREMENT = "AUTO_INCREMENT";
     private final String host;
     private final int port;

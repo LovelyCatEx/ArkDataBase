@@ -1,13 +1,13 @@
 package com.lovelycatv.arkdatabase.runtime.constructures.adapters;
 
-import com.lovelycatv.arkdatabase.runtime.ArkDataBase;
+import com.lovelycatv.arkdatabase.runtime.ArkDatabase;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public abstract class EntityDeleteAdapter<T> extends BaseEntityAdapter {
 
-    public EntityDeleteAdapter(ArkDataBase dataBase) {
+    public EntityDeleteAdapter(ArkDatabase dataBase) {
         super(dataBase);
     }
     public abstract void bind(PreparedStatement preparedStatement, T entity);
