@@ -1,8 +1,12 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group = 'com.lovelycatv.arkdatabase.compiler'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+
+group = 'com.lovelycatv.ark.compiler'
 version = '1.0-SNAPSHOT'
 
 repositories {
@@ -13,9 +17,18 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
     implementation fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs')
 }
 
 test {
     useJUnitPlatform()
+}
+
+shadowJar {
+    dependencies {
+        exclude(dependency(fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs')))
+    }
 }

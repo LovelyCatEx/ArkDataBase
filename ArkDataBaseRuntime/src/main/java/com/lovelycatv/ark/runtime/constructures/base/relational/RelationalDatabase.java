@@ -1,12 +1,13 @@
 package com.lovelycatv.ark.runtime.constructures.base.relational;
 
+import com.lovelycatv.ark.runtime.constructures.base.AnyDatabase;
 import com.lovelycatv.ark.runtime.constructures.base.relational.interfaces.IRelationalDatabase;
 import com.lovelycatv.ark.runtime.constructures.base.relational.interfaces.RelationalExecuteCallBack;
 import com.lovelycatv.ark.runtime.constructures.base.relational.interfaces.RelationalExecuteQueryCallBack;
 
 import java.sql.*;
 
-public abstract class RelationalDatabase implements IRelationalDatabase {
+public abstract class RelationalDatabase extends AnyDatabase implements IRelationalDatabase {
     protected Connection connection;
     @Override
     public Connection getConnection() {

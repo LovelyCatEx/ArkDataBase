@@ -6,7 +6,7 @@ plugins {
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 
-group = 'com.lovelycatv.arkdatabase.runtime'
+group = 'com.lovelycatv.ark.runtime'
 version = '1.0-SNAPSHOT'
 
 repositories {
