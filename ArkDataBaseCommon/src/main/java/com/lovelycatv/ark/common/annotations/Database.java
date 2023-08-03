@@ -10,7 +10,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
 public @interface Database {
+    String FILED_DATABASE_TYPE = "dataBaseType";
     String FILED_ENTITIES = "entities";
+    String FILED_TYPE_CONVERTERS = "typeConverters";
+    String FILED_VERSION = "version";
     DataBaseType dataBaseType();
     Class<?>[] entities();
     Class<?>[] typeConverters() default {};

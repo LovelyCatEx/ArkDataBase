@@ -1,4 +1,4 @@
-package com.lovelycatv.ark.runtime;
+package com.lovelycatv.ark.common.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface TypeConverter {
+public @interface ArkDebug {
+    boolean enabled() default true;
 }
