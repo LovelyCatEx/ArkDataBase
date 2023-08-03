@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="libs4Test">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/ArkDataBaseTest/libs" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/ArkDataBaseTest/libs" recursive="false" />
+  </library>
+</component>

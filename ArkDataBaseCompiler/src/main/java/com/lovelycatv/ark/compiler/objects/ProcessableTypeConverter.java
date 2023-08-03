@@ -1,4 +1,4 @@
 package com.lovelycatv.ark.compiler.objects;
 
-public class ProcessableTypeConverter {
+public final class ProcessableTypeConverter {
 }

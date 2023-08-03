@@ -1,13 +1,15 @@
 package com.lovelycatv.ark.runtime.constructures.adapters;
 
 import com.lovelycatv.ark.runtime.ArkDatabase;
+import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
+import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public abstract class EntityInsertAdapter<T> extends BaseEntityAdapter {
 
-    public EntityInsertAdapter(ArkDatabase dataBase) {
+    public EntityInsertAdapter(ArkRelationalDatabase<? extends RelationalDatabase> dataBase) {
         super(dataBase);
     }
     public abstract void bind(PreparedStatement preparedStatement, T entity);
