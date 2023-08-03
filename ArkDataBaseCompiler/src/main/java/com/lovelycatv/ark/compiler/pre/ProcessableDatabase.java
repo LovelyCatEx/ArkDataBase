@@ -2,14 +2,12 @@ package com.lovelycatv.ark.compiler.pre;
 
 import com.lovelycatv.ark.common.enums.DataBaseType;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public final class ProcessableDatabase extends AbstractProcessable {
     private final DataBaseType dataBaseType;
     private final int version;
-    private final ProcessableEntity.Controller processableEntityController = new ProcessableEntity.Controller();
-    private final ProcessableTypeConverter.Controller processableTypeConverterController = new ProcessableTypeConverter.Controller();
+    private final ProcessableEntity.Controller entityController = new ProcessableEntity.Controller();
+    private final ProcessableTypeConverter.Controller typeConverterController = new ProcessableTypeConverter.Controller();
+    private final ProcessableDAO.Controller daoController = new ProcessableDAO.Controller();
 
     public ProcessableDatabase(DataBaseType dataBaseType, int version) {
         super(ProcessableType.DATABASE);
@@ -25,11 +23,15 @@ public final class ProcessableDatabase extends AbstractProcessable {
         return version;
     }
 
-    public ProcessableEntity.Controller getProcessableEntityController() {
-        return processableEntityController;
+    public final ProcessableDAO.Controller getDaoController() {
+        return daoController;
     }
 
-    public ProcessableTypeConverter.Controller getProcessableTypeConverterController() {
-        return processableTypeConverterController;
+    public ProcessableEntity.Controller getEntityController() {
+        return entityController;
+    }
+
+    public ProcessableTypeConverter.Controller getTypeConverterController() {
+        return typeConverterController;
     }
 }

@@ -3,6 +3,7 @@ package com.lovelycatv.ark.compiler.processor;
 import com.lovelycatv.ark.common.annotations.Database;
 import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
 import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.processor.children.DatabaseProcessor;
 
 import javax.annotation.processing.*;
@@ -17,7 +18,8 @@ import java.util.Set;
 @SupportedAnnotationTypes("com.lovelycatv.ark.runtime.annotations.DataBase")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class ArkDatabaseProcessor extends AbstractProcessor {
-    private ProcessingEnvironment mProcessingEnvironment;
+    private ProcessingEnvironment processingEnvironment;
+    private RoundEnvironment roundEnvironment;
     private Filer filer;
     private Messager messager;
 
@@ -34,7 +36,7 @@ public class ArkDatabaseProcessor extends AbstractProcessor {
     }
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
-        this.mProcessingEnvironment = processingEnv;
+        this.processingEnvironment = processingEnv;
         this.filer = processingEnv.getFiler();
         this.messager = processingEnv.getMessager();
         super.init(processingEnv);
@@ -42,13 +44,15 @@ public class ArkDatabaseProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        this.roundEnvironment = roundEnv;
+
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(Database.class)) {
             if (annotatedElement.getKind() != ElementKind.CLASS) {
                 continue;
             }
             try {
                 new DatabaseProcessor(this).analysis(annotatedElement);
-            } catch (PreProcessUnexpectedError | PreProcessException e) {
+            } catch (PreProcessUnexpectedError | PreProcessException | ProcessorError e) {
                 throw new RuntimeException(e);
             }
         }
@@ -62,5 +66,21 @@ public class ArkDatabaseProcessor extends AbstractProcessor {
 
     public void info(Element e, String msg, Object... args) {
         this.messager.printMessage(Diagnostic.Kind.NOTE, String.format(msg, args), e);
+    }
+
+    public Filer getFiler() {
+        return filer;
+    }
+
+    public Messager getMessager() {
+        return messager;
+    }
+
+    public RoundEnvironment getRoundEnvironment() {
+        return roundEnvironment;
+    }
+
+    public ProcessingEnvironment getProcessingEnvironment() {
+        return processingEnvironment;
     }
 }

@@ -3,8 +3,6 @@ package com.lovelycatv.ark.compiler.pre;
 public abstract class AbstractProcessable {
     private ProcessableType processableType;
 
-    public AbstractProcessable() {}
-
     public AbstractProcessable(ProcessableType processableType) {
         this.processableType = processableType;
     }
@@ -16,6 +14,7 @@ public abstract class AbstractProcessable {
     public enum ProcessableType {
         DATABASE,
         ENTITY,
-        TYPE_CONVERTER
+        TYPE_CONVERTER,
+        DAO
     }
 }

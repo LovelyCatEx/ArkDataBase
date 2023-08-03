@@ -1,9 +1,6 @@
 package com.lovelycatv.ark.compiler.utils;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
@@ -12,6 +9,31 @@ import java.util.List;
 import java.util.Map;
 
 public class APTools {
+
+    public static boolean containsAnnotation(Element element, Class<? extends Annotation>... annotations) {
+        boolean found = false;
+        for (Class<? extends Annotation> annotation : annotations) {
+            if (element.getAnnotation(annotation) != null) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    public static List<Element> getAbstractMethods(Element classElement) {
+        List<Element> result = new ArrayList<>();
+        for (Element element : classElement.getEnclosedElements()) {
+            if (element.getKind() == ElementKind.METHOD) {
+                if (element.getModifiers().contains(Modifier.PUBLIC) && element.getModifiers().contains(Modifier.ABSTRACT)) {
+                    result.add(element);
+                }
+            }
+        }
+        return result;
+    }
+
+
     public static boolean isVoid(TypeMirror typeMirror) {
         return typeMirror.toString().equals("void") || typeMirror.toString().equals(Void.class.getName());
     }
@@ -76,7 +98,9 @@ public class APTools {
     }
 
     public static String getClassNameFromTypeMirror(TypeMirror typeMirror) {
-        return typeMirror.toString();
+        return typeMirror.toString()
+                .replace("(","")
+                .replace(")","");
     }
 
     public static boolean isTheSameTypeMirror(TypeMirror a, TypeMirror b) {

@@ -99,10 +99,10 @@ public final class ProcessableTypeConverter extends AbstractProcessable {
 
     @Data
     public static class Controller {
-        private final List<ProcessableTypeConverter> processableTypeConverterList = new ArrayList<>();
+        private final List<ProcessableTypeConverter> typeConverterList = new ArrayList<>();
 
         public Converter getConverterIfExists(TypeMirror typeMirror) {
-            for (ProcessableTypeConverter typeConverter : getProcessableTypeConverterList()) {
+            for (ProcessableTypeConverter typeConverter : getTypeConverterList()) {
                 for (Converter outConverter : typeConverter.getOutConverters()) {
                     if (APTools.isTheSameTypeMirror(typeMirror, outConverter.getFrom())) {
                         return outConverter;
