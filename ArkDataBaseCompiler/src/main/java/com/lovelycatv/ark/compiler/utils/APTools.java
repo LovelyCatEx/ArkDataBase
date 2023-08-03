@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 public class APTools {
+    public static boolean isVoid(TypeMirror typeMirror) {
+        return typeMirror.toString().equals("void") || typeMirror.toString().equals(Void.class.getName());
+    }
+
     /**
      * @param targetElement get annotation from the target element
      * @param annotation target annotation
@@ -69,5 +73,13 @@ public class APTools {
             }
         }
         return null;
+    }
+
+    public static String getClassNameFromTypeMirror(TypeMirror typeMirror) {
+        return typeMirror.toString();
+    }
+
+    public static boolean isTheSameTypeMirror(TypeMirror a, TypeMirror b) {
+        return getClassNameFromTypeMirror(a).equals(getClassNameFromTypeMirror(b));
     }
 }
