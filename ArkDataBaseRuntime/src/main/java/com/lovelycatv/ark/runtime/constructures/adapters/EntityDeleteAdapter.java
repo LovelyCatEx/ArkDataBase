@@ -9,6 +9,7 @@ import java.sql.SQLException;
 
 public abstract class EntityDeleteAdapter<T> extends BaseEntityAdapter {
 
+
     public EntityDeleteAdapter(ArkRelationalDatabase<? extends RelationalDatabase> dataBase) {
         super(dataBase);
     }

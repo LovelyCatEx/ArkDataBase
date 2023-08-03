@@ -8,7 +8,7 @@ import com.lovelycatv.ark.test.dao.UserDAO;
 import com.lovelycatv.ark.test.entites.User;
 import com.lovelycatv.ark.test.entites.Work;
 
-@ArkDebug
+@ArkDebug(enabled = false)
 @Database(dataBaseType = DataBaseType.MYSQL, entities = {User.class, Work.class}, typeConverters = {UserTypeConverters.class}, version = 1)
 
 public abstract class MyDatabase extends ArkDatabase {

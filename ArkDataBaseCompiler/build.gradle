@@ -30,8 +30,10 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
+    implementation 'com.squareup:javapoet:1.13.0'
+
     implementation fileTree(includes: ['ArkDataBaseCommon*'], dir: 'libs')
-    compileOnly fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs')
+    implementation fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 

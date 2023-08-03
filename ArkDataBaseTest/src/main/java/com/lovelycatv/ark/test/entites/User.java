@@ -9,6 +9,8 @@ import java.util.List;
 
 @Entity(tableName = "users")
 public class User {
+    @Column(columnName = "id", primaryKey = true)
+    private int id;
     @Column(columnName = "username")
     private int[] username;
     @Column(columnName = "password")

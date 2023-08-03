@@ -10,13 +10,43 @@ import java.util.List;
 
 public class StringX {
 
-    public static char[] byteToChar(byte[] bytes) {
-        Charset charset = StandardCharsets.ISO_8859_1;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
-        byteBuffer.put(bytes);
-        byteBuffer.flip();
-        CharBuffer charBuffer = charset.decode(byteBuffer);
-        return charBuffer.array();
+    /**
+     * @param classNameWithPackagePath cn.lovelycat.catroom.utils.StringX
+     * @return StringX
+     */
+    public static String getClassNameInFullName(String classNameWithPackagePath) {
+        if (classNameWithPackagePath == null || "".equals(classNameWithPackagePath)) {
+            return "";
+        }
+        if (!classNameWithPackagePath.contains(".")) {
+            return classNameWithPackagePath;
+        }
+        String[] sp = classNameWithPackagePath.split("\\.");
+        return sp[sp.length - 1];
+    }
+
+    /**
+     * @param classNameWithPackagePath cn.lovelycat.catroom.utils.StringX
+     * @return cn.lovelycat.catroom.utils
+     */
+    public static String getClassPathInFullName(String classNameWithPackagePath) {
+        if (classNameWithPackagePath == null || "".equals(classNameWithPackagePath)) {
+            return "";
+        }
+        if (!classNameWithPackagePath.contains(".")) {
+            return classNameWithPackagePath;
+        }
+        String[] sp = classNameWithPackagePath.split("\\.");
+        return classNameWithPackagePath.replace("." + sp[sp.length -1], "");
+    }
+
+    /**
+     * @param classNameWithPackagePath ()cn.lovelycat.cat(room.utils.St)ringX
+     * @return cn.lovelycat.catroom.utils.StringX
+     */
+    public static String clearIllegalCharInClassPath(String classNameWithPackagePath) {
+        return classNameWithPackagePath.replace("(","")
+                .replace(")","");
     }
 
 }

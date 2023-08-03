@@ -1,10 +1,11 @@
 package com.lovelycatv.ark.compiler.processor;
 
 import com.lovelycatv.ark.common.annotations.Database;
+import com.lovelycatv.ark.common.enums.DataBaseType;
 import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
 import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
-import com.lovelycatv.ark.compiler.processor.children.DatabaseProcessor;
+import com.lovelycatv.ark.compiler.processor.relational.children.DatabaseProcessor;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -50,8 +51,13 @@ public class ArkDatabaseProcessor extends AbstractProcessor {
             if (annotatedElement.getKind() != ElementKind.CLASS) {
                 continue;
             }
+            Database database = annotatedElement.getAnnotation(Database.class);
             try {
-                new DatabaseProcessor(this).analysis(annotatedElement);
+                if (database.dataBaseType().type == DataBaseType.Type.RELATIONAL) {
+                    new DatabaseProcessor(this).analysis(annotatedElement);
+                } else {
+                    throw new ProcessorError("Not support other database currently...");
+                }
             } catch (PreProcessUnexpectedError | PreProcessException | ProcessorError e) {
                 throw new RuntimeException(e);
             }
