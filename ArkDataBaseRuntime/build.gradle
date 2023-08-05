@@ -7,17 +7,20 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
+
+apply plugin: 'maven-publish'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'kotlin'
 apply plugin: 'java'
 
 group = 'com.lovelycatv.ark.runtime'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 
 repositories {
     mavenCentral()
@@ -44,6 +47,76 @@ shadowJar {
         include(dependency('org.xerial:sqlite-jdbc:3.42.0.0'))
     }
 }
+
 kotlin {
     jvmToolchain(11)
 }
+
+if (project.hasProperty("signing.keyId")) {
+    apply plugin: 'signing'
+    signing {
+        sign configurations.archives
+    }
+}
+
+sourceSets.main.resources.srcDirs = ["src/main/java","src/main/resources"]
+
+jar {
+    from sourceSets.main.output
+    from sourceSets.main.allJava
+}
+
+println("Project group: " + project.group)
+println("Project name: " + project.name)
+println("Project version: " + project.version)
+
+publishing {
+    publications {
+        mavenJar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+            from components.java
+            pom {
+                name = 'ark-runtime'
+                description = 'ArkDatabase runtime part'
+                url = 'https://lovelycatv.com'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        name = "LovelyCat"
+                        email = "pjrbuyvi@gmail.com"
+                    }
+                }
+                scm {
+                    url = project.getProperties().get("repositoriy-url")
+                    connection = 'scm:git:' + project.getProperties().get("repositoriy-url") + '.git'
+                    developerConnection = 'scm:git:' + project.getProperties().get("repositoriy-url") + '.git'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'arkdb'
+            // url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            // url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = project.getProperties().get("sonatype-username")
+                password = project.getProperties().get("sonatype-password")
+            }
+        }
+    }
+}
+
+javadoc {
+    options.encoding = "UTF-8"
+    failOnError = false
+}
+
