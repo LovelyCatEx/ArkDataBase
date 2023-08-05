@@ -95,6 +95,21 @@ public final class ProcessableTypeConverter extends AbstractProcessable {
         private TypeMirror to;
 
         private boolean isConvertOut;
+
+        public String getMethodNameInDAO() {
+            return from.toString()
+                    .replace(".","")
+                    .replace("[","_")
+                    .replace("]","_")
+                    .replace("<","_")
+                    .replace(">","_") + "_" +
+                    to.toString()
+                            .replace(".","")
+                            .replace("[","_")
+                            .replace("]","_")
+                            .replace("<","_")
+                            .replace(">","_");
+        }
     }
 
     @Data

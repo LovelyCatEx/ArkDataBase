@@ -4,12 +4,12 @@ import com.lovelycatv.ark.common.annotations.TypeConverter;
 
 public class UserTypeConverters {
     @TypeConverter
-    public String a(int[] a) {
+    public static String a(int[] a) {
         return "";
     }
 
     @TypeConverter
-    public int[] ab(String a) {
+    public static int[] ab(String a) {
         return new int[]{};
     }
 }

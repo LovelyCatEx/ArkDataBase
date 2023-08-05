@@ -11,11 +11,10 @@ import com.lovelycatv.ark.compiler.pre.relational.sql.SQLiteBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.IBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.utils.APTools;
+import com.lovelycatv.ark.compiler.utils.StringX;
 import lombok.Data;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -65,9 +64,31 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
                 entityColumn.setNotNull(column.notNull());
                 entityColumn.setAutoIncrement(column.autoIncrease());
             }
+
+            List<Element> beanMethodElement = APTools.findBeanMethod(enclosedElement, typeElement.getEnclosedElements());
+
+            if (beanMethodElement.size() != 2) {
+                throw new ProcessorUnexpectedError(String.format("Cannot find getter and setter method of field %s in %s",
+                        enclosedElement.getSimpleName(), entityType.asElement().asType().toString()));
+            }
+
+            for (Element element : beanMethodElement) {
+                boolean isSetter = element.getSimpleName().toString().startsWith("set");
+                BeanMethod beanMethod = new BeanMethod();
+                beanMethod.setMethodElement(element);
+                beanMethod.setGetter(!isSetter);
+                if (isSetter) {
+                    entityColumn.setSetter(beanMethod);
+                } else {
+                    entityColumn.setGetter(beanMethod);
+                }
+            }
+
+
+
+
             result.getEntityColumnList().add(entityColumn);
         }
-
         return result;
     }
 
@@ -103,6 +124,15 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
         return null;
     }
 
+    public EntityColumn getColumnByName(String columnName) {
+        for (EntityColumn column : entityColumnList) {
+            if (columnName.equals(column.getColumnName())) {
+                return column;
+            }
+        }
+        return null;
+    }
+
     public String getTableName() {
         return tableName;
     }
@@ -124,6 +154,14 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
     }
 
     @Data
+    public static class BeanMethod {
+        private Element methodElement;
+
+        // If not, it must be setter
+        private boolean isGetter;
+    }
+
+    @Data
     public static class EntityColumn {
         private Element element;
 
@@ -137,6 +175,10 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
 
         private boolean notNull;
 
+        private BeanMethod getter;
+
+        private BeanMethod setter;
+
         /**
          * The combination of isAboutToTypeConverter() and getTypeConverter(), by using this method, you could get the column type directly.
          * Assuming the column type is User.class, corresponding typeConverter will transform the User to String. By using this method, you will get the TypeMirror of String.class.
@@ -147,7 +189,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
          */
         public TypeMirror getColumnType(SupportedParameterManager supportedParameterManager, List<ProcessableTypeConverter> typeConverters) {
             if (isAboutToTypeConverter(supportedParameterManager)) {
-                return getTypeConverter(typeConverters);
+                return getTypeConverter(typeConverters).getTo();
             } else {
                 return this.element.asType();
             }
@@ -165,7 +207,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
          * @param typeConverters registered type converters
          * @return find the typeConverter from @param typeConverters of this column
          */
-        public TypeMirror getTypeConverter(List<ProcessableTypeConverter> typeConverters) {
+        public ProcessableTypeConverter.Converter getTypeConverter(List<ProcessableTypeConverter> typeConverters) {
             ProcessableTypeConverter.Converter found = null;
             out:
             for (ProcessableTypeConverter parentConverterObject : typeConverters) {
@@ -177,7 +219,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
                 }
             }
             if (found != null) {
-                return found.getTo();
+                return found;
             } else {
                 return null;
             }

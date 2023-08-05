@@ -17,4 +17,36 @@ public class User {
     private String password;
     @Column(columnName = "abc")
     private String abc;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int[] getUsername() {
+        return username;
+    }
+
+    public void setAbc(String abc) {
+        this.abc = abc;
+    }
+
+    public String getAbc() {
+        return abc;
+    }
+
+    public void setUsername(int[] username) {
+        this.username = username;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

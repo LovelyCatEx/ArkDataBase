@@ -1,5 +1,7 @@
 package com.lovelycatv.ark.compiler.utils;
 
+import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
+
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -105,5 +107,51 @@ public class APTools {
 
     public static boolean isTheSameTypeMirror(TypeMirror a, TypeMirror b) {
         return getClassNameFromTypeMirror(a).equals(getClassNameFromTypeMirror(b));
+    }
+
+    public static List<Element> findBeanMethod(Element fieldElement, List<? extends Element> elements) {
+        List<Element> result = new ArrayList<>();
+        for (Element methodElement : elements) {
+            if (methodElement.getKind() == ElementKind.METHOD && methodElement.getModifiers().contains(Modifier.PUBLIC)) {
+                if (!methodElement.getModifiers().contains(Modifier.STATIC)) {
+                    if (methodElement instanceof ExecutableElement) {
+                        ExecutableElement i = (ExecutableElement) methodElement;
+                        if (i.getParameters() == null) {
+                            continue;
+                        }
+                        String methodName = methodElement.getSimpleName().toString();
+                        int parameterCount = i.getParameters().size();
+                        if (parameterCount == 0) {
+                            // Maybe getter
+                            if (!methodName.startsWith("get")) {
+                                continue;
+                            }
+                            methodName = methodName.substring(3);
+                        } else if (parameterCount == 1) {
+                            // Maybe setter or boolean is
+                            VariableElement param = i.getParameters().get(0);
+                            if (!methodName.startsWith("set") && !methodName.startsWith("is")) {
+                                continue;
+                            }
+                            methodName = methodName.substring(methodName.startsWith("set") ? 3 : 2);
+
+                            if (!APTools.isTheSameTypeMirror(param.asType(), fieldElement.asType())) {
+                                continue;
+                            }
+                        } else {
+                            continue;
+                        }
+
+                        if (StringX.getJavaBeanMethodName(fieldElement.getSimpleName().toString(), false, false, true)
+                                .equals(methodName)) {
+                            result.add(methodElement);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 }

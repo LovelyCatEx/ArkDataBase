@@ -4,12 +4,11 @@ import com.lovelycatv.ark.common.annotations.common.Delete;
 import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Query;
 import com.lovelycatv.ark.common.annotations.common.Update;
-import com.lovelycatv.ark.compiler.ProcessorVars;
-import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDatabase;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
+import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDAOProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDatabaseProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.objects.EntityAdapterInfo;
@@ -23,7 +22,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +34,8 @@ public final class DAOProcessor extends AbstractDAOProcessor {
 
     @Override
     public List<TypeSpec.Builder> start() throws ProcessorError {
+        this.determineSupportedParametersManager();
+
         List<TypeSpec.Builder> result = new ArrayList<>();
         ProcessableDatabase database = getDatabaseProcessor().getProcessableDatabase();
         for (ProcessableDAO dao : database.getDaoController().getDAOList()) {
@@ -90,6 +90,22 @@ public final class DAOProcessor extends AbstractDAOProcessor {
 
         daoImpl.addMethod(constructor.build());
 
+        // Build typeConverters
+        for (ProcessableTypeConverter typeConverter : super.getDatabaseProcessor().getProcessableDatabase().getTypeConverterController().getTypeConverterList()) {
+            for (ProcessableTypeConverter.Converter converter : typeConverter.getTypeConverterList()) {
+                MethodSpec methodSpec = MethodSpec.methodBuilder(converter.getMethodNameInDAO())
+                        .addModifiers(Modifier.PRIVATE)
+                        .addParameter(ClassName.get(converter.getFrom()), "_from")
+                        .returns(ClassName.get(converter.getTo()))
+                        .addStatement("return $T.$L($L)", typeConverter.getTypeConverterType(), converter.getElement().getSimpleName(), "_from")
+                        .build();
+
+                daoImpl.addMethod(methodSpec);
+            }
+
+        }
+
+
         return daoImpl;
     }
 
@@ -116,7 +132,8 @@ public final class DAOProcessor extends AbstractDAOProcessor {
             if (!APTools.containsAnnotation(interfaceElement, Insert.class, Update.class, Delete.class)) {
                 continue;
             }
-            EntityAdapterInfo entityAdapterInfo = new EntityAdapterInfo();
+            EntityAdapterInfo entityAdapterInfo = new EntityAdapterInfo(super.getSupportedParameterManager(),
+                    super.getDatabaseProcessor().getProcessableDatabase().getTypeConverterController().getTypeConverterList());
 
             ExecutableElement i = (ExecutableElement) interfaceElement;
             List<? extends VariableElement> parameters = i.getParameters();
@@ -152,5 +169,10 @@ public final class DAOProcessor extends AbstractDAOProcessor {
     @Override
     protected void debugging() {
 
+    }
+
+    @Override
+    public void determineSupportedParametersManager() {
+        super.setSupportedParameterManager(super.getDatabaseProcessor().getSupportedParameterManager());
     }
 }

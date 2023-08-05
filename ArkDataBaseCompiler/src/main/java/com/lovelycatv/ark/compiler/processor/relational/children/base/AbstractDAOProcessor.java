@@ -13,7 +13,6 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
 
     public AbstractDAOProcessor(AbstractDatabaseProcessor databaseProcessor) {
         this.databaseProcessor = databaseProcessor;
-        determineSupportedParametersManager();
     }
 
     public abstract List<TypeSpec.Builder> start() throws ProcessorError, ProcessorUnexpectedError;
@@ -28,8 +27,4 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
         return databaseProcessor;
     }
 
-    @Override
-    public void determineSupportedParametersManager() {
-        super.setSupportedParameterManager(super.getSupportedParameterManager());
-    }
 }

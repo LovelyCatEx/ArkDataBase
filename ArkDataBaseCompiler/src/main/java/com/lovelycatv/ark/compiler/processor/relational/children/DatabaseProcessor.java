@@ -157,6 +157,8 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
                         String.format(" | %s column(s)", entity.getEntityColumnList().size()));
                 for (ProcessableEntity.EntityColumn column : entity.getEntityColumnList()) {
                     super.getProcessor().info(entity.getDeclaredEntityType().asElement(), "- column: " + column.getElement().getSimpleName() + " : " + column.getElement().asType().toString());
+                    super.getProcessor().info(entity.getDeclaredEntityType().asElement(), column.getGetter().getMethodElement().getSimpleName().toString());
+                    super.getProcessor().info(entity.getDeclaredEntityType().asElement(), column.getSetter().getMethodElement().getSimpleName().toString());
                 }
             }
 

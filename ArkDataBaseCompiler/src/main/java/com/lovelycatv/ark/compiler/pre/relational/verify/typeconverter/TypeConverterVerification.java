@@ -8,6 +8,7 @@ import com.lovelycatv.ark.compiler.pre.relational.verify.AbstractProcessableVeri
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.utils.APTools;
 
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +54,11 @@ public class TypeConverterVerification extends AbstractProcessableVerification<I
 
                 if (converter.getFrom() == null) {
                     throw new ProcessorException(String.format("The TypeConverter %s() in %s must have only exactly one parameter",
+                            converter.getElement().getSimpleName(), processableTypeConverter.getTypeConverterType().asElement().asType().toString()));
+                }
+
+                if (!converter.getElement().getModifiers().contains(Modifier.STATIC)) {
+                    throw new ProcessorException(String.format("The TypeConverter %s() in %s must have static modifier",
                             converter.getElement().getSimpleName(), processableTypeConverter.getTypeConverterType().asElement().asType().toString()));
                 }
             }

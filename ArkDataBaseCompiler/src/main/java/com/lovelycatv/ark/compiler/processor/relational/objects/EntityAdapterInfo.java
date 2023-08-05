@@ -6,15 +6,19 @@ import com.lovelycatv.ark.common.annotations.common.Update;
 import com.lovelycatv.ark.common.enums.DataBaseType;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
+import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;
+import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.processor.relational.children.DAOProcessor;
 import com.lovelycatv.ark.runtime.constructures.adapters.BaseEntityAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityDeleteAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityInsertAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityUpdateAdapter;
+import com.lovelycatv.ark.runtime.supported.ArkJDBC;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -25,6 +29,13 @@ import java.util.Map;
 
 public class EntityAdapterInfo {
     private ProcessableEntity targetEntity;
+    private final SupportedParameterManager supportedParameterManager;
+    private final List<ProcessableTypeConverter> typeConverterList;
+
+    public EntityAdapterInfo(SupportedParameterManager supportedParameterManager, List<ProcessableTypeConverter> typeConverterList) {
+        this.supportedParameterManager = supportedParameterManager;
+        this.typeConverterList = typeConverterList;
+    }
 
     public Map<Class<? extends Annotation>, FieldSpec> annotationWithFields = new HashMap<>();
     public Map<Class<? extends Annotation>, TypeSpec> annotationWithAnonymousTypes = new HashMap<>();
@@ -65,7 +76,32 @@ public class EntityAdapterInfo {
                     .returns(void.class);
 
             bind.beginControlFlow("try");
-            for (Map.Entry<Integer, String> entry : statement.getSlotWithColumnName().entrySet()) {
+            for (Map.Entry<Integer, String> stmtEntry : statement.getSlotWithColumnName().entrySet()) {
+                ProcessableEntity.EntityColumn column = targetEntity.getColumnByName(stmtEntry.getValue());
+                if (column == null) {
+                    throw new ProcessorError(String.format("Could not find column when trying to process adapters in %s",
+                            targetEntity.getDeclaredEntityType().asElement().asType().toString()));
+                }
+                String methodName = "";
+                for (Map.Entry<Class<?>, String> tmpEntry : ArkJDBC.getJavaTypeClassWithBindMethodNameMap().entrySet()) {
+                    if (tmpEntry.getKey().getName().equals(column.getColumnType(supportedParameterManager, typeConverterList).toString())) {
+                        methodName = ArkJDBC.getJavaTypeClassWithBindMethodNameMap().get(tmpEntry.getKey());
+                        break;
+                    }
+                }
+                if (methodName == null || "".equals(methodName)) {
+                    throw new ProcessorError(String.format("Could not find binding method name of PreparedStatement when trying to process adapters in %s",
+                            targetEntity.getDeclaredEntityType().asElement().asType().toString()));
+                }
+                boolean usingTypeConverter = column.isAboutToTypeConverter(supportedParameterManager);
+                if (usingTypeConverter) {
+                    ProcessableTypeConverter.Converter converter = column.getTypeConverter(typeConverterList);
+                    bind.addStatement("$L.$L($L, $L($L.$L()))", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(), converter.getMethodNameInDAO(), parameterName_bind_entity,
+                            column.getGetter().getMethodElement().getSimpleName().toString());
+                } else {
+                    bind.addStatement("$L.$L($L, $L.$L())", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(), parameterName_bind_entity,
+                            column.getGetter().getMethodElement().getSimpleName().toString());
+                }
 
             }
             bind.nextControlFlow("catch ($T e)", SQLException.class);
