@@ -1,4 +1,4 @@
-package com.lovelycatv.ark.runtime.simulation.dao;
+package com.lovelycatv.ark.compiler.simulation.dao;
 
 import com.lovelycatv.ark.common.annotations.Dao;
 import com.lovelycatv.ark.common.annotations.common.Delete;
