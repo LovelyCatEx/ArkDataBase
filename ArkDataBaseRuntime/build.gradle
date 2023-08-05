@@ -14,6 +14,7 @@ plugins {
 }
 
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'kotlin'
@@ -24,6 +25,8 @@ version = '1.0'
 
 repositories {
     mavenCentral()
+    maven { url "https://repo.maven.apache.org/maven2" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
@@ -52,18 +55,20 @@ kotlin {
     jvmToolchain(11)
 }
 
-if (project.hasProperty("signing.keyId")) {
-    apply plugin: 'signing'
-    signing {
-        sign configurations.archives
-    }
-}
-
 sourceSets.main.resources.srcDirs = ["src/main/java","src/main/resources"]
 
 jar {
-    from sourceSets.main.output
-    from sourceSets.main.allJava
+    enabled = true
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+}
+
+task javaDocJar(type: Jar) {
+    from javadoc
+    archiveClassifier.set('javadoc')
 }
 
 println("Project group: " + project.group)
@@ -73,8 +78,10 @@ println("Project version: " + project.version)
 publishing {
     publications {
         mavenJar(MavenPublication) {
-            groupId project.group
-            artifactId project.name
+            artifact sourcesJar
+            artifact javaDocJar
+            groupId 'com.lovelycatv.ark'
+            artifactId 'runtime'
             version project.version
             from components.java
             pom {
@@ -101,6 +108,11 @@ publishing {
             }
         }
     }
+
+    signing {
+        sign publishing.publications.mavenJar
+    }
+
     repositories {
         maven {
             name project.getProperties().get("maven-name")
