@@ -28,18 +28,13 @@ public class EntityAdapterInfo {
     public Map<Class<? extends Annotation>, FieldSpec> annotationWithFields = new HashMap<>();
     public Map<Class<? extends Annotation>, TypeSpec> annotationWithAnonymousTypes = new HashMap<>();
 
-    public List<FieldSpec> buildFiledList() {
-        final List<FieldSpec> result = new ArrayList<>();
+    public void buildFiledList() {
         final FieldSpec insert = FieldSpec.builder(ClassName.get(EntityInsertAdapter.class), getFieldName(Insert.class), Modifier.PRIVATE, Modifier.FINAL).build();
         final FieldSpec delete = FieldSpec.builder(ClassName.get(EntityDeleteAdapter.class), getFieldName(Delete.class), Modifier.PRIVATE, Modifier.FINAL).build();
         final FieldSpec update = FieldSpec.builder(ClassName.get(EntityUpdateAdapter.class), getFieldName(Update.class), Modifier.PRIVATE, Modifier.FINAL).build();
         annotationWithFields.put(Insert.class, insert);
         annotationWithFields.put(Update.class, update);
         annotationWithFields.put(Delete.class, delete);
-        result.add(insert);
-        result.add(delete);
-        result.add(update);
-        return result;
     }
 
     public void buildAdapterAnonymousTypes(DataBaseType dataBaseType) throws ProcessorError {

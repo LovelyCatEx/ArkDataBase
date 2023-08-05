@@ -15,10 +15,7 @@ import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDa
 import com.lovelycatv.ark.compiler.processor.relational.objects.EntityAdapterInfo;
 import com.lovelycatv.ark.compiler.utils.APTools;
 import com.lovelycatv.ark.compiler.utils.StringX;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -36,7 +33,7 @@ public final class DAOProcessor extends AbstractDAOProcessor {
     }
 
     @Override
-    public void start() throws ProcessorError, ProcessorUnexpectedError {
+    public void start() throws ProcessorError {
         ProcessableDatabase database = getDatabaseProcessor().getProcessableDatabase();
         for (ProcessableDAO dao : database.getDaoController().getDAOList()) {
             buildDAO(dao);
@@ -59,18 +56,25 @@ public final class DAOProcessor extends AbstractDAOProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ClassName.get(StringX.getClassPathInFullName(interfaceFullName), StringX.getClassNameInFullName(interfaceFullName)));
 
-        // Add adapters and constructor
+        // Adapters and Constructor
         MethodSpec.Builder constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-        
+
+        // Add Adapters
         for (EntityAdapterInfo adapterInfo : entityAdapterInfos) {
-            daoImpl.addFields(adapterInfo.buildFiledList());
+            adapterInfo.buildFiledList();
             adapterInfo.buildAdapterAnonymousTypes(getDatabaseProcessor().getProcessableDatabase().getDataBaseType());
+            for (Map.Entry<Class<? extends Annotation>, FieldSpec> entry : adapterInfo.annotationWithFields.entrySet()) {
+                daoImpl.addField(entry.getValue());
+            }
+            // Init adapters in constructor
             for (Map.Entry<Class<? extends Annotation>, TypeSpec> entry : adapterInfo.annotationWithAnonymousTypes.entrySet()) {
                 constructor.addStatement(String.format("this.%s = $L", adapterInfo.getFieldName(entry.getKey())), entry.getValue());
             }
         }
+
         daoImpl.addMethod(constructor.build());
 
+        // Generate class file
         try {
             JavaFile.builder(ProcessorVars.PACKAGE_NAME, daoImpl.build()).build().writeTo(getDatabaseProcessor().getProcessor().getFiler());
         } catch (IOException e) {
