@@ -1,7 +1,7 @@
 package com.lovelycatv.ark.compiler.processor.relational.children.base;
 
-import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDatabase;
@@ -24,16 +24,16 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
         this.daoProcessor = new DAOProcessor(this);
     }
 
-    public abstract void analysis(Element annotatedElement) throws PreProcessUnexpectedError, PreProcessException, ProcessorError;
+    public abstract void analysis(Element annotatedElement) throws ProcessorUnexpectedError, ProcessorException, ProcessorError;
 
-    protected abstract List<ProcessableDAO> analysisDAO(Element annotatedElement) throws PreProcessUnexpectedError;
-    protected abstract List<ProcessableEntity> analysisEntities(Element annotatedElement) throws PreProcessUnexpectedError;
+    protected abstract List<ProcessableDAO> analysisDAO(Element annotatedElement) throws ProcessorUnexpectedError;
+    protected abstract List<ProcessableEntity> analysisEntities(Element annotatedElement) throws ProcessorUnexpectedError;
 
-    protected abstract List<ProcessableTypeConverter> analysisTypeConverters(Element annotatedElement, SupportedParameterManager supportedParameterManager) throws PreProcessUnexpectedError, PreProcessException;
+    protected abstract List<ProcessableTypeConverter> analysisTypeConverters(Element annotatedElement, SupportedParameterManager supportedParameterManager) throws ProcessorUnexpectedError, ProcessorException;
 
-    protected abstract void verifyProcessableObjects() throws PreProcessUnexpectedError, PreProcessException;
+    protected abstract void verifyProcessableObjects() throws ProcessorUnexpectedError, ProcessorException;
 
-    protected abstract void startDAOProcessor() throws ProcessorError, PreProcessUnexpectedError;
+    protected abstract void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError;
 
     public final ArkDatabaseProcessor getProcessor() {
         return processor;

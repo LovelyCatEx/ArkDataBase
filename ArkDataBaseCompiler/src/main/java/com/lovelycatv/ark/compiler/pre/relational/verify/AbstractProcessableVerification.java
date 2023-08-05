@@ -1,8 +1,8 @@
 package com.lovelycatv.ark.compiler.pre.relational.verify;
 
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 
 public abstract class AbstractProcessableVerification<T> {
@@ -16,7 +16,7 @@ public abstract class AbstractProcessableVerification<T> {
         this.processableObject = processableObject;
     }
 
-    public abstract void verify() throws PreProcessException, PreProcessUnexpectedError;
+    public abstract void verify() throws ProcessorException, ProcessorUnexpectedError;
 
     public final T getProcessableObject() {
         return processableObject;

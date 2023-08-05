@@ -4,7 +4,6 @@ import com.lovelycatv.ark.common.annotations.common.Delete;
 import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Update;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;

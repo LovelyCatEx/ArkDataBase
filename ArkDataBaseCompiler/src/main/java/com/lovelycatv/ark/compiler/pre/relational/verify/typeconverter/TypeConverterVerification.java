@@ -1,8 +1,8 @@
 package com.lovelycatv.ark.compiler.pre.relational.verify.typeconverter;
 
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.pre.relational.verify.AbstractProcessableVerification;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
@@ -21,7 +21,7 @@ public class TypeConverterVerification extends AbstractProcessableVerification<I
     }
 
     @Override
-    public void verify() throws PreProcessException, PreProcessUnexpectedError {
+    public void verify() throws ProcessorException, ProcessorUnexpectedError {
         Iterable<ProcessableTypeConverter> processableTypeConverters = getProcessableObject();
 
         final Map<TypeMirror, List<TypeMirror>> fromTo = new HashMap<>();
@@ -47,12 +47,12 @@ public class TypeConverterVerification extends AbstractProcessableVerification<I
                 }
 
                 if (APTools.isVoid(converter.getTo())) {
-                    throw new PreProcessException(String.format("The return type of TypeConverter %s() in %s must be not void",
+                    throw new ProcessorException(String.format("The return type of TypeConverter %s() in %s must be not void",
                             converter.getElement().getSimpleName(), processableTypeConverter.getTypeConverterType().asElement().asType().toString()));
                 }
 
                 if (converter.getFrom() == null) {
-                    throw new PreProcessException(String.format("The TypeConverter %s() in %s must have only exactly one parameter",
+                    throw new ProcessorException(String.format("The TypeConverter %s() in %s must have only exactly one parameter",
                             converter.getElement().getSimpleName(), processableTypeConverter.getTypeConverterType().asElement().asType().toString()));
                 }
             }
@@ -61,12 +61,12 @@ public class TypeConverterVerification extends AbstractProcessableVerification<I
         // Check whether the typeConverter has duplicate out
         for (Map.Entry<TypeMirror, List<TypeMirror>> entry : fromTo.entrySet()) {
             if (entry.getValue() == null || entry.getValue().size() == 0) {
-                throw new PreProcessUnexpectedError(String.format("An unexpected error occurred while verifying typeConverter %s(), could not find any return type",
+                throw new ProcessorUnexpectedError(String.format("An unexpected error occurred while verifying typeConverter %s(), could not find any return type",
                         entry.getKey().toString()));
             }
 
             if (entry.getValue().size() > 1) {
-                throw new PreProcessException(String.format("The type %s has multiple returns, make sure that it has only one return type",
+                throw new ProcessorException(String.format("The type %s has multiple returns, make sure that it has only one return type",
                         entry.getKey().toString()));
             }
         }
@@ -77,7 +77,7 @@ public class TypeConverterVerification extends AbstractProcessableVerification<I
             TypeMirror to = entry.getValue().get(0);
             boolean couldTurnBack = toFrom.containsKey(to) && toFrom.get(to).contains(from);
             if (!couldTurnBack) {
-                throw new PreProcessException(String.format("Type %s does not have any method that could transform data from database to it!", from.toString()));
+                throw new ProcessorException(String.format("Type %s does not have any method that could transform data from database to it!", from.toString()));
             }
         }
     }

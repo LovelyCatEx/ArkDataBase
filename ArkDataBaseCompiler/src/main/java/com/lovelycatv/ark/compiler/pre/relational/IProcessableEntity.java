@@ -1,7 +1,6 @@
 package com.lovelycatv.ark.compiler.pre.relational;
 
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.sql.IBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;

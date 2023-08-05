@@ -5,7 +5,7 @@ import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Query;
 import com.lovelycatv.ark.common.annotations.common.Update;
 import com.lovelycatv.ark.compiler.ProcessorVars;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDatabase;
@@ -36,7 +36,7 @@ public final class DAOProcessor extends AbstractDAOProcessor {
     }
 
     @Override
-    public void start() throws ProcessorError, PreProcessUnexpectedError {
+    public void start() throws ProcessorError, ProcessorUnexpectedError {
         ProcessableDatabase database = getDatabaseProcessor().getProcessableDatabase();
         for (ProcessableDAO dao : database.getDaoController().getDAOList()) {
             buildDAO(dao);
@@ -46,7 +46,7 @@ public final class DAOProcessor extends AbstractDAOProcessor {
     }
 
     @Override
-    public void buildDAO(ProcessableDAO processableDAO) throws ProcessorError, PreProcessUnexpectedError {
+    public void buildDAO(ProcessableDAO processableDAO) throws ProcessorError {
         // Verify DAO
         verifyDAO(processableDAO);
 

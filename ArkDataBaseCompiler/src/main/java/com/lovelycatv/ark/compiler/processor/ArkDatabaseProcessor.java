@@ -2,8 +2,8 @@ package com.lovelycatv.ark.compiler.processor;
 
 import com.lovelycatv.ark.common.annotations.Database;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.processor.relational.children.DatabaseProcessor;
 
@@ -58,7 +58,7 @@ public class ArkDatabaseProcessor extends AbstractProcessor {
                 } else {
                     throw new ProcessorError("Not support other database currently...");
                 }
-            } catch (PreProcessUnexpectedError | PreProcessException | ProcessorError e) {
+            } catch (ProcessorUnexpectedError | ProcessorException | ProcessorError e) {
                 throw new RuntimeException(e);
             }
         }

@@ -4,7 +4,7 @@ import com.lovelycatv.ark.common.annotations.Column;
 import com.lovelycatv.ark.common.annotations.Entity;
 import com.lovelycatv.ark.common.annotations.Ignore;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.sql.MySQLBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.SQLiteBaseSQLStatement;
@@ -31,7 +31,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
         super(ProcessableType.ENTITY);
     }
 
-    public static ProcessableEntity builder(DeclaredType entityType) throws PreProcessUnexpectedError {
+    public static ProcessableEntity builder(DeclaredType entityType) throws ProcessorUnexpectedError {
         final ProcessableEntity result = new ProcessableEntity();
 
         result.setDeclaredEntityType(entityType);
@@ -40,7 +40,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
 
         final Entity entity = typeElement.getAnnotation(Entity.class);
         if (entity == null) {
-            throw new PreProcessUnexpectedError(String.format("Cannot find @Entity in %s",
+            throw new ProcessorUnexpectedError(String.format("Cannot find @Entity in %s",
                     entityType.asElement().asType().toString()));
         }
 

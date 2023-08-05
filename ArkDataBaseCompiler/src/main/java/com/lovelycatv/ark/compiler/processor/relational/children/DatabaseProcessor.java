@@ -4,8 +4,8 @@ import com.lovelycatv.ark.common.annotations.ArkDebug;
 import com.lovelycatv.ark.common.annotations.Dao;
 import com.lovelycatv.ark.common.annotations.Database;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDatabase;
@@ -32,10 +32,10 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    public void analysis(Element annotatedElement) throws PreProcessUnexpectedError, PreProcessException, ProcessorError {
+    public void analysis(Element annotatedElement) throws ProcessorUnexpectedError, ProcessorException, ProcessorError {
         Database databaseAnnotation = annotatedElement.getAnnotation(Database.class);
         if (databaseAnnotation == null) {
-            throw new PreProcessUnexpectedError("Cannot find @DataBase annotation");
+            throw new ProcessorUnexpectedError("Cannot find @DataBase annotation");
         }
 
         ArkDebug arkDebug = annotatedElement.getAnnotation(ArkDebug.class);
@@ -74,19 +74,19 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    public void determineSupportedParametersManager() throws PreProcessUnexpectedError {
+    public void determineSupportedParametersManager() throws ProcessorUnexpectedError {
         DataBaseType dataBaseType = super.getProcessableDatabase().getDataBaseType();
         if (dataBaseType == DataBaseType.MYSQL) {
             super.setSupportedParameterManager(new MySQLSupportedParameterManager());
         } else if (dataBaseType == DataBaseType.SQLITE) {
             super.setSupportedParameterManager(new SQLiteSupportedParameterManager());
         } else {
-            throw new PreProcessUnexpectedError("If you see this output error that means I've forgot to add statement in this part! class: " + this.getClass().getName());
+            throw new ProcessorUnexpectedError("If you see this output error that means I've forgot to add statement in this part! class: " + this.getClass().getName());
         }
     }
 
     @Override
-    protected List<ProcessableDAO> analysisDAO(Element annotatedElement) throws PreProcessUnexpectedError {
+    protected List<ProcessableDAO> analysisDAO(Element annotatedElement) throws ProcessorUnexpectedError {
         Set<? extends Element> annotatedWithDAO = getProcessor().getRoundEnvironment().getElementsAnnotatedWith(Dao.class);
         List<ProcessableDAO> result = new ArrayList<>();
         List<Element> abstractMethods = APTools.getAbstractMethods(annotatedElement);
@@ -96,7 +96,7 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
                 if (APTools.isTheSameTypeMirror(method.asType(), classElement.asType())) {
                     Dao dao = classElement.getAnnotation(Dao.class);
                     if (dao == null) {
-                        throw new PreProcessUnexpectedError(String.format("Cannot find @Dao in %s", APTools.getClassNameFromTypeMirror(classElement.asType())));
+                        throw new ProcessorUnexpectedError(String.format("Cannot find @Dao in %s", APTools.getClassNameFromTypeMirror(classElement.asType())));
                     }
                     result.add(ProcessableDAO.builder(method, classElement));
                 }
@@ -106,11 +106,11 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    protected List<ProcessableEntity> analysisEntities(Element annotatedElement) throws PreProcessUnexpectedError {
+    protected List<ProcessableEntity> analysisEntities(Element annotatedElement) throws ProcessorUnexpectedError {
         List<ProcessableEntity> result = new ArrayList<>();
         List<DeclaredType> declaredTypesOfEntity = APTools.getClassArrayFromAnnotation(annotatedElement, Database.class, Database.FILED_ENTITIES, true);
         if (declaredTypesOfEntity == null) {
-            throw new PreProcessUnexpectedError(String.format("Cannot read entities in database %s", annotatedElement.asType().toString()));
+            throw new ProcessorUnexpectedError(String.format("Cannot read entities in database %s", annotatedElement.asType().toString()));
         }
         for (DeclaredType entityType : declaredTypesOfEntity) {
             result.add(ProcessableEntity.builder(entityType));
@@ -120,11 +120,11 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
 
     @Override
     protected List<ProcessableTypeConverter> analysisTypeConverters(Element annotatedElement, SupportedParameterManager supportedParameterManager)
-            throws PreProcessUnexpectedError, PreProcessException {
+            throws ProcessorUnexpectedError, ProcessorException {
         List<ProcessableTypeConverter> result = new ArrayList<>();
         List<DeclaredType> declaredTypesOfTypeConverter = APTools.getClassArrayFromAnnotation(annotatedElement, Database.class, Database.FILED_TYPE_CONVERTERS, true);
         if (declaredTypesOfTypeConverter == null) {
-            throw new PreProcessUnexpectedError(String.format("Cannot read typeConverters in database %s", annotatedElement.asType().toString()));
+            throw new ProcessorUnexpectedError(String.format("Cannot read typeConverters in database %s", annotatedElement.asType().toString()));
         }
         for (DeclaredType typeConverterType : declaredTypesOfTypeConverter) {
             result.add(ProcessableTypeConverter.builder(typeConverterType, supportedParameterManager));
@@ -133,7 +133,7 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    protected void verifyProcessableObjects() throws PreProcessUnexpectedError, PreProcessException {
+    protected void verifyProcessableObjects() throws ProcessorUnexpectedError, ProcessorException {
         // Verify typeConverters
         new TypeConverterVerification(super.getProcessableDatabase().getDataBaseType(), super.getSupportedParameterManager(),
                 super.getProcessableDatabase().getTypeConverterController().getTypeConverterList()).verify();
@@ -146,7 +146,7 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    protected void startDAOProcessor() throws ProcessorError, PreProcessUnexpectedError {
+    protected void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError {
         super.getDaoProcessor().start();
     }
 

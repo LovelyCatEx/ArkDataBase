@@ -1,6 +1,6 @@
 package com.lovelycatv.ark.compiler.processor.relational.children.base;
 
-import com.lovelycatv.ark.compiler.exceptions.PreProcessUnexpectedError;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 
 public abstract class AbstractProcessor {
@@ -8,7 +8,7 @@ public abstract class AbstractProcessor {
     private boolean isDebugging;
     protected abstract void debugging();
 
-    public abstract void determineSupportedParametersManager() throws PreProcessUnexpectedError;
+    public abstract void determineSupportedParametersManager() throws ProcessorUnexpectedError;
 
     public SupportedParameterManager getSupportedParameterManager() {
         return supportedParameterManager;

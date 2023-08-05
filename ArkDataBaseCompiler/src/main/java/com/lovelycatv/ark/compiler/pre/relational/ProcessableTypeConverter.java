@@ -1,7 +1,7 @@
 package com.lovelycatv.ark.compiler.pre.relational;
 
 import com.lovelycatv.ark.common.annotations.TypeConverter;
-import com.lovelycatv.ark.compiler.exceptions.PreProcessException;
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.utils.APTools;
 import lombok.Data;
@@ -23,7 +23,7 @@ public final class ProcessableTypeConverter extends AbstractProcessable {
         super(ProcessableType.TYPE_CONVERTER);
     }
 
-    public static ProcessableTypeConverter builder(DeclaredType typeConverterType, SupportedParameterManager supportedParameterManager) throws PreProcessException {
+    public static ProcessableTypeConverter builder(DeclaredType typeConverterType, SupportedParameterManager supportedParameterManager) throws ProcessorException {
         ProcessableTypeConverter result = new ProcessableTypeConverter();
         result.setTypeConverterType(typeConverterType);
 
