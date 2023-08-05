@@ -78,9 +78,9 @@ publishing {
             version project.version
             from components.java
             pom {
-                name = 'ark-runtime'
-                description = 'ArkDatabase runtime part'
-                url = 'https://lovelycatv.com'
+                name = project.getProperties().get("pom-name")
+                description = project.getProperties().get("pom-description")
+                url = project.getProperties().get("pom-url")
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
@@ -89,8 +89,8 @@ publishing {
                 }
                 developers {
                     developer {
-                        name = "LovelyCat"
-                        email = "pjrbuyvi@gmail.com"
+                        name = project.getProperties().get("developer-name")
+                        email = project.getProperties().get("developer-email")
                     }
                 }
                 scm {
@@ -103,7 +103,7 @@ publishing {
     }
     repositories {
         maven {
-            name 'arkdb'
+            name project.getProperties().get("maven-name")
             // url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
             // url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
