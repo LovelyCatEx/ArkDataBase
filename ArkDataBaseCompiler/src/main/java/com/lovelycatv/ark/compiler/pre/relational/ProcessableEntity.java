@@ -9,7 +9,7 @@ import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.sql.MySQLBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.SQLiteBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.IBaseSQLStatement;
-import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;
+import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.utils.APTools;
 import lombok.Data;
 
@@ -85,21 +85,6 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
         return supportedBaseSQLStatement;
     }
 
-    @Override
-    public StandardSQLStatement getInsertSQLStatement(DataBaseType dataBaseType) throws ProcessorError {
-        return createBaseSQLStatement(dataBaseType).getInsertSQLStatement(this);
-    }
-
-    @Override
-    public StandardSQLStatement getDeleteSQLStatement(DataBaseType dataBaseType) throws ProcessorError {
-        return createBaseSQLStatement(dataBaseType).getDeleteSQLStatement(this);
-    }
-
-    @Override
-    public StandardSQLStatement getUpdateSQLStatement(DataBaseType dataBaseType) throws ProcessorError {
-        return createBaseSQLStatement(dataBaseType).getUpdateSQLStatement(this);
-    }
-
     public boolean hasPrimaryKey() {
         for (EntityColumn column : getEntityColumnList()) {
             if (column.isPrimaryKey()) {
@@ -152,7 +137,52 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
 
         private boolean notNull;
 
-        private int cursor;
+        /**
+         * The combination of isAboutToTypeConverter() and getTypeConverter(), by using this method, you could get the column type directly.
+         * Assuming the column type is User.class, corresponding typeConverter will transform the User to String. By using this method, you will get the TypeMirror of String.class.
+         * If it not found the typeConverter but it should be, then the method will return null
+         * @param supportedParameterManager supportedParameterManager
+         * @param typeConverters typeConverters
+         * @return typeMirror
+         */
+        public TypeMirror getColumnType(SupportedParameterManager supportedParameterManager, List<ProcessableTypeConverter> typeConverters) {
+            if (isAboutToTypeConverter(supportedParameterManager)) {
+                return getTypeConverter(typeConverters);
+            } else {
+                return this.element.asType();
+            }
+        }
+
+        /**
+         * @param supportedParameterManager supportedParameterManager
+         * @return Whether the column type should be parsed by typeConverter
+         */
+        public boolean isAboutToTypeConverter(SupportedParameterManager supportedParameterManager) {
+            return !supportedParameterManager.isSupportedInJavaTypes(this.element.asType());
+        }
+
+        /**
+         * @param typeConverters registered type converters
+         * @return find the typeConverter from @param typeConverters of this column
+         */
+        public TypeMirror getTypeConverter(List<ProcessableTypeConverter> typeConverters) {
+            ProcessableTypeConverter.Converter found = null;
+            out:
+            for (ProcessableTypeConverter parentConverterObject : typeConverters) {
+                for (ProcessableTypeConverter.Converter outConverter : parentConverterObject.getOutConverters()) {
+                    if (APTools.isTheSameTypeMirror(outConverter.getFrom(), this.getElement().asType())) {
+                        found = outConverter;
+                        break out;
+                    }
+                }
+            }
+            if (found != null) {
+                return found.getTo();
+            } else {
+                return null;
+            }
+        }
+
     }
 
     @Data

@@ -15,8 +15,11 @@ public abstract class SupportedParameterManager {
     protected final List<SupportedParameter> supportedEntityParamTypeList = new ArrayList<>();
     protected final List<SupportedParameter> supportedDAOParamTypeList = new ArrayList<>();
 
-    public SupportedParameterManager(DataBaseType dataBaseType) {
+    public final String AUTO_INCREMENT;
+
+    public SupportedParameterManager(DataBaseType dataBaseType, String AUTO_INCREMENT) {
         this.dataBaseType = dataBaseType;
+        this.AUTO_INCREMENT = AUTO_INCREMENT;
 
         initSupportedJavaTypeList();
     }
@@ -47,6 +50,15 @@ public abstract class SupportedParameterManager {
             }
         }
         return false;
+    }
+
+    public JavaSupportedType getSupportedInJavaTypes(TypeMirror javaTypeClass) {
+        for (JavaSupportedType type : getSupportedJavaTypeList()) {
+            if (type.getParameterClass().getName().equals(APTools.getClassNameFromTypeMirror(javaTypeClass))) {
+                return type;
+            }
+        }
+        return null;
     }
 
     public final List<JavaSupportedType> getSupportedJavaTypeList() {

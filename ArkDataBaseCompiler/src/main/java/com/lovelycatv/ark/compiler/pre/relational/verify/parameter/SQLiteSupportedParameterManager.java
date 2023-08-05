@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class SQLiteSupportedParameterManager extends SupportedParameterManager {
     public SQLiteSupportedParameterManager() {
-        super(DataBaseType.MYSQL);
+        super(DataBaseType.MYSQL, "AUTOINCREMENT");
     }
 
 

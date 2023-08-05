@@ -4,6 +4,7 @@ import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
 import com.lovelycatv.ark.compiler.processor.relational.objects.EntityAdapterInfo;
+import com.squareup.javapoet.TypeSpec;
 
 import java.util.List;
 
@@ -15,9 +16,9 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
         determineSupportedParametersManager();
     }
 
-    public abstract void start() throws ProcessorError, ProcessorUnexpectedError;
+    public abstract List<TypeSpec.Builder> start() throws ProcessorError, ProcessorUnexpectedError;
 
-    public abstract void buildDAO(ProcessableDAO processableDAO) throws ProcessorError;
+    public abstract TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError;
 
     public abstract void verifyDAO(ProcessableDAO processableDAO) throws ProcessorError;
 

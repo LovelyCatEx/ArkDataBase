@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class MySQLSupportedParameterManager extends SupportedParameterManager {
     public MySQLSupportedParameterManager() {
-        super(DataBaseType.MYSQL);
+        super(DataBaseType.MYSQL, "AUTO_INCREMENT");
     }
 
 

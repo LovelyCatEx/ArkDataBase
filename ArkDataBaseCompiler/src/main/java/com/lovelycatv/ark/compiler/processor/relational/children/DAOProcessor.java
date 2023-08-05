@@ -15,6 +15,8 @@ import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDa
 import com.lovelycatv.ark.compiler.processor.relational.objects.EntityAdapterInfo;
 import com.lovelycatv.ark.compiler.utils.APTools;
 import com.lovelycatv.ark.compiler.utils.StringX;
+import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
+import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Element;
@@ -33,17 +35,22 @@ public final class DAOProcessor extends AbstractDAOProcessor {
     }
 
     @Override
-    public void start() throws ProcessorError {
+    public List<TypeSpec.Builder> start() throws ProcessorError {
+        List<TypeSpec.Builder> result = new ArrayList<>();
         ProcessableDatabase database = getDatabaseProcessor().getProcessableDatabase();
         for (ProcessableDAO dao : database.getDaoController().getDAOList()) {
-            buildDAO(dao);
+            result.add(buildDAO(dao));
         }
 
         debugging();
+
+        return result;
     }
 
+    // Define fields name constants
+    public static final String FIELD_DAO_DATABASE = "__db";
     @Override
-    public void buildDAO(ProcessableDAO processableDAO) throws ProcessorError {
+    public TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError {
         // Verify DAO
         verifyDAO(processableDAO);
 
@@ -58,6 +65,15 @@ public final class DAOProcessor extends AbstractDAOProcessor {
 
         // Adapters and Constructor
         MethodSpec.Builder constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
+
+        // Add ArkRelationalDatabase Field
+        // ArkRelationalDatabase<? extends RelationalDatabase>
+        Class<? extends RelationalDatabase> databaseManagerClass = super.getDatabaseProcessor().getDatabaseManagerClass();
+        ParameterizedTypeName relationalDatabaseTypeName = ParameterizedTypeName.get(ClassName.get(ArkRelationalDatabase.class), ClassName.get(databaseManagerClass));
+        daoImpl.addField(relationalDatabaseTypeName, FIELD_DAO_DATABASE, Modifier.PRIVATE, Modifier.FINAL);
+        final String PARAM_CONSTRUCTOR_DATABASE = "_db";
+        constructor.addParameter(relationalDatabaseTypeName, PARAM_CONSTRUCTOR_DATABASE);
+        constructor.addStatement("this.$L = $L", FIELD_DAO_DATABASE, PARAM_CONSTRUCTOR_DATABASE);
 
         // Add Adapters
         for (EntityAdapterInfo adapterInfo : entityAdapterInfos) {
@@ -74,12 +90,7 @@ public final class DAOProcessor extends AbstractDAOProcessor {
 
         daoImpl.addMethod(constructor.build());
 
-        // Generate class file
-        try {
-            JavaFile.builder(ProcessorVars.PACKAGE_NAME, daoImpl.build()).build().writeTo(getDatabaseProcessor().getProcessor().getFiler());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return daoImpl;
     }
 
     @Override

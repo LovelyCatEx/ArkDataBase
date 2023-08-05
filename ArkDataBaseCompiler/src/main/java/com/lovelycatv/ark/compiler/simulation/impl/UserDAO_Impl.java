@@ -1,9 +1,9 @@
 package com.lovelycatv.ark.compiler.simulation.impl;
 
+import com.lovelycatv.ark.compiler.simulation.dao.UserDAO;
+import com.lovelycatv.ark.compiler.simulation.entites.User;
 import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
 import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
-import com.lovelycatv.ark.runtime.simulation.dao.UserDAO;
-import com.lovelycatv.ark.runtime.simulation.entites.User;
 
 public class UserDAO_Impl implements UserDAO {
     private final ArkRelationalDatabase<? extends RelationalDatabase> __db;
@@ -11,6 +11,7 @@ public class UserDAO_Impl implements UserDAO {
     public UserDAO_Impl(ArkRelationalDatabase<? extends RelationalDatabase> db) {
         this.__db = db;
     }
+
     @Override
     public void insert(User... user) {
 

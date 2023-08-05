@@ -32,9 +32,9 @@ dependencies {
 
     implementation 'com.squareup:javapoet:1.13.0'
 
-    implementation fileTree(includes: ['ArkDataBaseCommon*'], dir: 'libs')
-    implementation fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    implementation 'com.lovelycatv.ark:runtime:1.1'
 }
 
 test {
@@ -43,7 +43,7 @@ test {
 
 shadowJar {
     dependencies {
-        exclude(dependency(fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs')))
+
     }
 }
 kotlin {

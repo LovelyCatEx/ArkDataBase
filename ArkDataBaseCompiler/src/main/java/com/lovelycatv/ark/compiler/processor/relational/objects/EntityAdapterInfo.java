@@ -7,6 +7,7 @@ import com.lovelycatv.ark.common.enums.DataBaseType;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;
+import com.lovelycatv.ark.compiler.processor.relational.children.DAOProcessor;
 import com.lovelycatv.ark.runtime.constructures.adapters.BaseEntityAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityDeleteAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityInsertAdapter;
@@ -42,9 +43,9 @@ public class EntityAdapterInfo {
         final ParameterizedTypeName deleteAdapter = ParameterizedTypeName.get(ClassName.get(EntityDeleteAdapter.class), ClassName.get(targetEntity.getDeclaredEntityType()));
         final ParameterizedTypeName updateAdapter = ParameterizedTypeName.get(ClassName.get(EntityUpdateAdapter.class), ClassName.get(targetEntity.getDeclaredEntityType()));
 
-        final StandardSQLStatement insertStatement = targetEntity.getInsertSQLStatement(dataBaseType);
-        final StandardSQLStatement deleteStatement = targetEntity.getDeleteSQLStatement(dataBaseType);
-        final StandardSQLStatement updateStatement = targetEntity.getUpdateSQLStatement(dataBaseType);
+        final StandardSQLStatement insertStatement = targetEntity.createBaseSQLStatement(dataBaseType).getInsertSQLStatement(targetEntity);
+        final StandardSQLStatement deleteStatement = targetEntity.createBaseSQLStatement(dataBaseType).getDeleteSQLStatement(targetEntity);
+        final StandardSQLStatement updateStatement = targetEntity.createBaseSQLStatement(dataBaseType).getUpdateSQLStatement(targetEntity);
 
         final ParameterizedTypeName[] adapters = new ParameterizedTypeName[]{insertAdapter, updateAdapter, deleteAdapter};
         final StandardSQLStatement[] statements = new StandardSQLStatement[]{insertStatement, updateStatement, deleteStatement};
@@ -71,7 +72,7 @@ public class EntityAdapterInfo {
             bind.addStatement("throw new $T(e)", RuntimeException.class);
             bind.endControlFlow();
 
-            TypeSpec type = TypeSpec.anonymousClassBuilder("")
+            TypeSpec type = TypeSpec.anonymousClassBuilder("this." + DAOProcessor.FIELD_DAO_DATABASE)
                     .addSuperinterface(adapter)
                     .addMethod(MethodSpec.methodBuilder(BaseEntityAdapter.ABSTRACT_METHOD_CREATE_QUERY_SQL)
                             .addAnnotation(Override.class)

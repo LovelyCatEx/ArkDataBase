@@ -1,27 +1,33 @@
 package com.lovelycatv.ark.compiler.processor.relational.children;
 
-import com.lovelycatv.ark.common.annotations.ArkDebug;
 import com.lovelycatv.ark.common.annotations.Dao;
 import com.lovelycatv.ark.common.annotations.Database;
 import com.lovelycatv.ark.common.enums.DataBaseType;
+import com.lovelycatv.ark.compiler.ProcessorVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
-import com.lovelycatv.ark.compiler.pre.relational.ProcessableDatabase;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
+import com.lovelycatv.ark.compiler.pre.relational.sql.IBaseSQLStatement;
+import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.verify.entity.EntityVerification;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.MySQLSupportedParameterManager;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SQLiteSupportedParameterManager;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
+import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.object.JavaSupportedType;
 import com.lovelycatv.ark.compiler.pre.relational.verify.typeconverter.TypeConverterVerification;
 import com.lovelycatv.ark.compiler.processor.ArkDatabaseProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDatabaseProcessor;
 import com.lovelycatv.ark.compiler.utils.APTools;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,48 +35,6 @@ import java.util.Set;
 public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     public DatabaseProcessor(ArkDatabaseProcessor processor) {
         super(processor);
-    }
-
-    @Override
-    public void analysis(Element annotatedElement) throws ProcessorUnexpectedError, ProcessorException, ProcessorError {
-        Database databaseAnnotation = annotatedElement.getAnnotation(Database.class);
-        if (databaseAnnotation == null) {
-            throw new ProcessorUnexpectedError("Cannot find @DataBase annotation");
-        }
-
-        ArkDebug arkDebug = annotatedElement.getAnnotation(ArkDebug.class);
-        if (arkDebug != null) {
-            setDebugging(arkDebug.enabled());
-        } else {
-            setDebugging(false);
-        }
-
-        super.getDaoProcessor().setDebugging(super.isDebugging());
-
-        super.processableDatabase = new ProcessableDatabase(databaseAnnotation.dataBaseType(), databaseAnnotation.version());
-
-        determineSupportedParametersManager();
-
-        // Analysis abstract dao
-        List<ProcessableDAO> processableDAOList = analysisDAO(annotatedElement);
-        super.getProcessableDatabase().getDaoController().getDAOList().addAll(processableDAOList);
-
-        // Analysis typeConverters
-        List<ProcessableTypeConverter> processableTypeConverterList = analysisTypeConverters(annotatedElement, super.getSupportedParameterManager());
-        super.getProcessableDatabase().getTypeConverterController().getTypeConverterList().addAll(processableTypeConverterList);
-
-        // Analysis entities
-        List<ProcessableEntity> processableEntityList = analysisEntities(annotatedElement);
-        super.getProcessableDatabase().getEntityController().getEntityList().addAll(processableEntityList);
-
-        // Verify processable objects
-        verifyProcessableObjects();
-
-        // Create DAO impl files
-        startDAOProcessor();
-
-        // Debugging
-        debugging();
     }
 
     @Override
@@ -146,8 +110,31 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    protected void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError {
-        super.getDaoProcessor().start();
+    protected void startDAOProcessor() throws ProcessorError {
+        List<TypeSpec.Builder> daoImpls = super.getDaoProcessor().start();
+
+        for (TypeSpec.Builder daoImpl : daoImpls) {
+            try {
+                JavaFile.builder(ProcessorVars.PACKAGE_NAME, daoImpl.build()).build().writeTo(super.getProcessor().getFiler());
+            } catch (IOException e) {
+                throw new ProcessorError("Cannot write DAO impls to your project");
+            }
+        }
+
+    }
+
+    @Override
+    protected List<CodeBlock> getCodeInInitDatabase() throws ProcessorError {
+        List<CodeBlock> result = new ArrayList<>();
+        for (ProcessableEntity processableEntity : super.getProcessableDatabase().getEntityController().getEntityList()) {
+            IBaseSQLStatement iBaseSQLStatement = processableEntity.createBaseSQLStatement(super.getSupportedParameterManager().getDataBaseType());
+            List<StandardSQLStatement> createTableStatement = iBaseSQLStatement.getCreateTableStatement(processableEntity,
+                    super.getProcessableDatabase().getTypeConverterController().getTypeConverterList(), super.getSupportedParameterManager());
+            for (StandardSQLStatement statement : createTableStatement) {
+                result.add(CodeBlock.builder().add("super.getDatabaseManager().execute($S, null)", statement.getSql()).build());
+            }
+        }
+        return result;
     }
 
     @Override

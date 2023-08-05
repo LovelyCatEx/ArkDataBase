@@ -1,18 +1,17 @@
 package com.lovelycatv.ark.compiler.simulation.impl;
 
 import com.lovelycatv.ark.common.enums.DataBaseType;
+import com.lovelycatv.ark.compiler.simulation.MyDatabase;
+import com.lovelycatv.ark.compiler.simulation.dao.UserDAO;
 import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
 import com.lovelycatv.ark.runtime.constructures.base.relational.MySQLManager;
-import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
-import com.lovelycatv.ark.runtime.simulation.MyDatabase;
-import com.lovelycatv.ark.runtime.simulation.dao.UserDAO;
 
 public final class MyDatabaseImpl extends MyDatabase {
-    private volatile UserDAO_Impl userDAO;
+    private volatile UserDAO_Impl _userDAO;
 
     @Override
-    public ArkRelationalDatabase<? extends RelationalDatabase> getDatabase() {
-        return (ArkRelationalDatabase<? extends RelationalDatabase>) super.getDatabase();
+    public ArkRelationalDatabase<MySQLManager> getDatabase() {
+        return (ArkRelationalDatabase<MySQLManager>) super.getDatabase();
     }
 
     @Override
@@ -24,14 +23,13 @@ public final class MyDatabaseImpl extends MyDatabase {
                 getDatabaseManager().execute("", null);
             }
         });
-
     }
 
     @Override
     public UserDAO userDAO() {
-        if (this.userDAO == null) {
-            this.userDAO = new UserDAO_Impl(this.getDatabase());
+        if (this._userDAO == null) {
+            this._userDAO = new UserDAO_Impl(this.getDatabase());
         }
-        return this.userDAO;
+        return this._userDAO;
     }
 }

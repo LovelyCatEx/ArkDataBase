@@ -10,11 +10,11 @@ public abstract class AbstractProcessor {
 
     public abstract void determineSupportedParametersManager() throws ProcessorUnexpectedError;
 
-    public SupportedParameterManager getSupportedParameterManager() {
+    public final SupportedParameterManager getSupportedParameterManager() {
         return supportedParameterManager;
     }
 
-    public void setSupportedParameterManager(SupportedParameterManager supportedParameterManager) {
+    public final void setSupportedParameterManager(SupportedParameterManager supportedParameterManager) {
         this.supportedParameterManager = supportedParameterManager;
     }
 

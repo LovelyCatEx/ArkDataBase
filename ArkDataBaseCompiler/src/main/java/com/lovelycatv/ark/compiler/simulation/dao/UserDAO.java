@@ -4,7 +4,7 @@ import com.lovelycatv.ark.common.annotations.Dao;
 import com.lovelycatv.ark.common.annotations.common.Delete;
 import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Update;
-import com.lovelycatv.ark.runtime.simulation.entites.User;
+import com.lovelycatv.ark.compiler.simulation.entites.User;
 
 @Dao
 public interface UserDAO {

@@ -7,5 +7,9 @@ public abstract class ArkDatabase {
         return this.baseArkDatabase;
     }
 
+    public void setBaseArkDatabase(BaseArkDatabase baseArkDatabase) {
+        this.baseArkDatabase = baseArkDatabase;
+    }
+
     public abstract void initDatabase();
 }
