@@ -10,9 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotationUtils {
+
     public static List<Class<? extends Annotation>> getArkSQLAnnotations() {
         List<Class<? extends Annotation>> result = new ArrayList<>();
         result.add(Query.class);
+        result.addAll(getArkSQLAdapterAnnotations());
+        return result;
+    }
+
+    public static List<Class<? extends Annotation>> getArkSQLAdapterAnnotations() {
+        List<Class<? extends Annotation>> result = new ArrayList<>();
         result.add(Insert.class);
         result.add(Update.class);
         result.add(Delete.class);

@@ -20,11 +20,9 @@ import com.lovelycatv.ark.runtime.supported.ArkJDBC;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,19 +42,14 @@ public class EntityAdapterInfo {
     public Map<Class<? extends Annotation>, FieldSpec> annotationWithFields = new HashMap<>();
     public Map<Class<? extends Annotation>, TypeSpec> annotationWithAnonymousTypes = new HashMap<>();
 
-    public void buildFiledList() {
-        final FieldSpec insert = FieldSpec.builder(ClassName.get(EntityInsertAdapter.class), getFieldName(Insert.class), Modifier.PRIVATE, Modifier.FINAL).build();
-        final FieldSpec delete = FieldSpec.builder(ClassName.get(EntityDeleteAdapter.class), getFieldName(Delete.class), Modifier.PRIVATE, Modifier.FINAL).build();
-        final FieldSpec update = FieldSpec.builder(ClassName.get(EntityUpdateAdapter.class), getFieldName(Update.class), Modifier.PRIVATE, Modifier.FINAL).build();
-        annotationWithFields.put(Insert.class, insert);
-        annotationWithFields.put(Update.class, update);
-        annotationWithFields.put(Delete.class, delete);
-    }
-
-    public void buildAdapterAnonymousTypes(DataBaseType dataBaseType) throws ProcessorError {
+    public void build(DataBaseType dataBaseType) throws ProcessorError {
         final ParameterizedTypeName insertAdapter = ParameterizedTypeName.get(ClassName.get(EntityInsertAdapter.class), ClassName.get(targetEntity.getDeclaredEntityType()));
         final ParameterizedTypeName deleteAdapter = ParameterizedTypeName.get(ClassName.get(EntityDeleteAdapter.class), ClassName.get(targetEntity.getDeclaredEntityType()));
         final ParameterizedTypeName updateAdapter = ParameterizedTypeName.get(ClassName.get(EntityUpdateAdapter.class), ClassName.get(targetEntity.getDeclaredEntityType()));
+
+        annotationWithFields.put(Insert.class, FieldSpec.builder(insertAdapter, getFieldName(Insert.class), Modifier.PRIVATE, Modifier.FINAL).build());
+        annotationWithFields.put(Update.class, FieldSpec.builder(updateAdapter, getFieldName(Update.class), Modifier.PRIVATE, Modifier.FINAL).build());
+        annotationWithFields.put(Delete.class, FieldSpec.builder(deleteAdapter, getFieldName(Delete.class), Modifier.PRIVATE, Modifier.FINAL).build());
 
         final StandardSQLStatement insertStatement = targetEntity.createBaseSQLStatement(dataBaseType).getInsertSQLStatement(targetEntity);
         final StandardSQLStatement deleteStatement = targetEntity.createBaseSQLStatement(dataBaseType).getDeleteSQLStatement(targetEntity);

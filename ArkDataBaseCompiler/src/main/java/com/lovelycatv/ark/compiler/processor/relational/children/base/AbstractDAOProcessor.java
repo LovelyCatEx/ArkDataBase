@@ -40,12 +40,9 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
 
     // Define fields name constants
     public static final String FIELD_DAO_DATABASE = "__db";
-    public TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError {
+    public TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError, ProcessorUnexpectedError {
         // Verify DAO
         verifyDAO(processableDAO);
-
-        // Scan adapters
-        List<EntityAdapterInfo> entityAdapterInfos = scanAllUsedAdapters(processableDAO);
 
         // Start build
         String interfaceFullName = APTools.getClassNameFromTypeMirror(processableDAO.getDAOClassElement().asType());
@@ -66,9 +63,9 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
         constructor.addStatement("this.$L = $L", FIELD_DAO_DATABASE, PARAM_CONSTRUCTOR_DATABASE);
 
         // Add Adapters
+        List<EntityAdapterInfo> entityAdapterInfos = scanAllUsedAdapters(processableDAO);
         for (EntityAdapterInfo adapterInfo : entityAdapterInfos) {
-            adapterInfo.buildFiledList();
-            adapterInfo.buildAdapterAnonymousTypes(getDatabaseProcessor().getProcessableDatabase().getDataBaseType());
+            adapterInfo.build(getDatabaseProcessor().getProcessableDatabase().getDataBaseType());
             for (Map.Entry<Class<? extends Annotation>, FieldSpec> entry : adapterInfo.annotationWithFields.entrySet()) {
                 daoImpl.addField(entry.getValue());
             }
@@ -80,12 +77,19 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
 
         daoImpl.addMethod(constructor.build());
 
+        // Add adapter methods
+        for (MethodSpec.Builder method : buildAllAdapterMethods(processableDAO)) {
+            daoImpl.addMethod(method.build());
+        }
+
         return daoImpl;
     }
 
     public abstract void verifyDAO(ProcessableDAO processableDAO) throws ProcessorError;
 
     public abstract List<EntityAdapterInfo> scanAllUsedAdapters(ProcessableDAO processableDAO) throws ProcessorError;
+
+    public abstract List<MethodSpec.Builder> buildAllAdapterMethods(ProcessableDAO processableDAO) throws ProcessorUnexpectedError;
 
     public final AbstractDatabaseProcessor getDatabaseProcessor() {
         return databaseProcessor;

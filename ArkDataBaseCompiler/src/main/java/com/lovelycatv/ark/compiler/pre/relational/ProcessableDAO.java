@@ -35,6 +35,8 @@ public class ProcessableDAO extends AbstractProcessable {
             for (Class<? extends Annotation> annotationClass : AnnotationUtils.getArkSQLAnnotations()) {
                 if (APTools.containsAnnotation(enclosedElement, annotationClass)) {
                     daoMethod.getAnnotations().add(enclosedElement.getAnnotation(annotationClass));
+                    // Is adapter method
+                    daoMethod.setAdapterMethod(AnnotationUtils.getArkSQLAdapterAnnotations().contains(annotationClass));
                 }
             }
             processableDAO.getDaoMethodList().add(daoMethod);
@@ -42,6 +44,16 @@ public class ProcessableDAO extends AbstractProcessable {
 
 
         return processableDAO;
+    }
+
+    public List<DAOMethod> getAdapterMethods() {
+        List<DAOMethod> result = new ArrayList<>();
+        for (DAOMethod daoMethod : getDaoMethodList()) {
+            if (daoMethod.isAdapterMethod()) {
+                result.add(daoMethod);
+            }
+        }
+        return result;
     }
 
     public List<DAOMethod> getDaoMethodList() {
@@ -78,6 +90,6 @@ public class ProcessableDAO extends AbstractProcessable {
     public static class DAOMethod {
         private Element element;
         private List<Annotation> annotations;
-
+        private boolean adapterMethod;
     }
 }
