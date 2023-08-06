@@ -4,12 +4,14 @@ import com.lovelycatv.ark.common.annotations.common.Delete;
 import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Update;
 import com.lovelycatv.ark.common.enums.DataBaseType;
+import com.lovelycatv.ark.compiler.ProcessorVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.processor.relational.children.DAOProcessor;
+import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDatabaseProcessor;
 import com.lovelycatv.ark.runtime.constructures.adapters.BaseEntityAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityDeleteAdapter;
 import com.lovelycatv.ark.runtime.constructures.adapters.EntityInsertAdapter;
@@ -31,10 +33,12 @@ public class EntityAdapterInfo {
     private ProcessableEntity targetEntity;
     private final SupportedParameterManager supportedParameterManager;
     private final List<ProcessableTypeConverter> typeConverterList;
+    private final AbstractDatabaseProcessor databaseProcessor;
 
-    public EntityAdapterInfo(SupportedParameterManager supportedParameterManager, List<ProcessableTypeConverter> typeConverterList) {
+    public EntityAdapterInfo(AbstractDatabaseProcessor databaseProcessor, SupportedParameterManager supportedParameterManager, List<ProcessableTypeConverter> typeConverterList) {
         this.supportedParameterManager = supportedParameterManager;
         this.typeConverterList = typeConverterList;
+        this.databaseProcessor = databaseProcessor;
     }
 
     public Map<Class<? extends Annotation>, FieldSpec> annotationWithFields = new HashMap<>();
@@ -96,8 +100,9 @@ public class EntityAdapterInfo {
                 boolean usingTypeConverter = column.isAboutToTypeConverter(supportedParameterManager);
                 if (usingTypeConverter) {
                     ProcessableTypeConverter.Converter converter = column.getTypeConverter(typeConverterList);
-                    bind.addStatement("$L.$L($L, $L($L.$L()))", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(), converter.getMethodNameInDAO(), parameterName_bind_entity,
-                            column.getGetter().getMethodElement().getSimpleName().toString());
+                    bind.addStatement("$L.$L($L, $L.$L($L.$L()))", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(),
+                            ProcessorVars.getTypeConverterClassname(this.databaseProcessor.getProcessableDatabase().getClassElement().getSimpleName().toString()), converter.getMethodNameInDAO(),
+                            parameterName_bind_entity, column.getGetter().getMethodElement().getSimpleName().toString());
                 } else {
                     bind.addStatement("$L.$L($L, $L.$L())", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(), parameterName_bind_entity,
                             column.getGetter().getMethodElement().getSimpleName().toString());

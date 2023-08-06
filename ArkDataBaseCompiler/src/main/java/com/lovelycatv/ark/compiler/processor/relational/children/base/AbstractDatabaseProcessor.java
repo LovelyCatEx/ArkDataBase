@@ -14,6 +14,7 @@ import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.processor.ArkDatabaseProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.children.DAOProcessor;
+import com.lovelycatv.ark.compiler.processor.relational.children.TypeConverterProcessor;
 import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
 import com.lovelycatv.ark.runtime.constructures.base.relational.MySQLManager;
 import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
@@ -29,9 +30,12 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
     protected ProcessableDatabase processableDatabase;
     private final DAOProcessor daoProcessor;
 
+    private final TypeConverterProcessor typeConverterProcessor;
+
     public AbstractDatabaseProcessor(ArkDatabaseProcessor processor) {
         this.processor = processor;
         this.daoProcessor = new DAOProcessor(this);
+        this.typeConverterProcessor = new TypeConverterProcessor(this);
     }
 
     public Class<? extends RelationalDatabase> getDatabaseManagerClass() {
@@ -53,7 +57,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
 
         this.getDaoProcessor().setDebugging(super.isDebugging());
 
-        this.processableDatabase = new ProcessableDatabase(databaseAnnotation.dataBaseType(), databaseAnnotation.version());
+        this.processableDatabase = new ProcessableDatabase(databaseAnnotation.dataBaseType(), databaseAnnotation.version(), annotatedElement);
 
         // Init supported parameters manager
         determineSupportedParametersManager();
@@ -69,6 +73,9 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
 
         // Verify processable objects
         verifyProcessableObjects();
+
+        // Create typeConverter class
+        startTypeConverterProcessor();
 
         // Create DAO impl files
         startDAOProcessor();
@@ -123,7 +130,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
         for (ProcessableDAO processableDAO : getProcessableDatabase().getDaoController().getDAOList()) {
             final String DAOFileName = processableDAO.getFileName();
             final String FIELD_DAO = "_" + DAOFileName;
-            final ClassName daoClassName = ClassName.get(ProcessorVars.PACKAGE_NAME, DAOFileName);
+            final ClassName daoClassName = ClassName.get(ProcessorVars.getDAOPackageName(this.getProcessableDatabase().getClassElement().getSimpleName().toString()), DAOFileName);
             FieldSpec daoImpl = FieldSpec.builder(daoClassName, FIELD_DAO)
                     .addModifiers(Modifier.PRIVATE, Modifier.VOLATILE)
                     .build();
@@ -143,9 +150,9 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
             databaseImpl.addMethod(daoMethod);
         }
 
-
         try {
-            JavaFile.builder(ProcessorVars.PACKAGE_NAME, databaseImpl.build()).build().writeTo(getProcessor().getFiler());
+            JavaFile.builder(ProcessorVars.getPackageName(this.getProcessableDatabase().getClassElement().getSimpleName().toString()),
+                    databaseImpl.build()).build().writeTo(getProcessor().getFiler());
         } catch (IOException e) {
             throw new ProcessorError(String.format("Cannot write database impl (%s) to your project", annotatedElement.asType().toString()));
         }
@@ -158,7 +165,9 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
 
     protected abstract void verifyProcessableObjects() throws ProcessorUnexpectedError, ProcessorException;
 
-    protected abstract void startDAOProcessor() throws ProcessorError;
+    protected abstract void startTypeConverterProcessor() throws ProcessorUnexpectedError;
+
+    protected abstract void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError;
 
     protected abstract List<CodeBlock> getCodeInInitDatabase() throws ProcessorError;
 
@@ -168,6 +177,10 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
 
     protected final DAOProcessor getDaoProcessor() {
         return daoProcessor;
+    }
+
+    protected TypeConverterProcessor getTypeConverterProcessor() {
+        return typeConverterProcessor;
     }
 
     public final ProcessableDatabase getProcessableDatabase() {

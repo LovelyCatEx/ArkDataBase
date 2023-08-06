@@ -12,11 +12,11 @@ import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.pre.relational.sql.IBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.StandardSQLStatement;
+import com.lovelycatv.ark.compiler.pre.relational.verify.dao.DAOVerification;
 import com.lovelycatv.ark.compiler.pre.relational.verify.entity.EntityVerification;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.MySQLSupportedParameterManager;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SQLiteSupportedParameterManager;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
-import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.object.JavaSupportedType;
 import com.lovelycatv.ark.compiler.pre.relational.verify.typeconverter.TypeConverterVerification;
 import com.lovelycatv.ark.compiler.processor.ArkDatabaseProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.children.base.AbstractDatabaseProcessor;
@@ -107,15 +107,33 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
             new EntityVerification(super.getProcessableDatabase().getDataBaseType(), super.getSupportedParameterManager(), entity,
                     super.getProcessableDatabase().getTypeConverterController()).verify();
         }
+
+        // Verify dao
+        for (ProcessableDAO processableDAO : super.getProcessableDatabase().getDaoController().getDAOList()) {
+            new DAOVerification(super.getProcessableDatabase().getDataBaseType(), super.getSupportedParameterManager(), processableDAO).verify();
+        }
+
     }
 
     @Override
-    protected void startDAOProcessor() throws ProcessorError {
+    protected void startTypeConverterProcessor() throws ProcessorUnexpectedError {
+        TypeSpec.Builder start = super.getTypeConverterProcessor().start();
+        try {
+            JavaFile.builder(ProcessorVars.getPackageName(super.getProcessableDatabase().getClassElement().getSimpleName().toString()),
+                    start.build()).build().writeTo(super.getProcessor().getFiler());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError {
         List<TypeSpec.Builder> daoImpls = super.getDaoProcessor().start();
 
         for (TypeSpec.Builder daoImpl : daoImpls) {
             try {
-                JavaFile.builder(ProcessorVars.PACKAGE_NAME, daoImpl.build()).build().writeTo(super.getProcessor().getFiler());
+                JavaFile.builder(ProcessorVars.getDAOPackageName(super.getProcessableDatabase().getClassElement().getSimpleName().toString()),
+                        daoImpl.build()).build().writeTo(super.getProcessor().getFiler());
             } catch (IOException e) {
                 throw new ProcessorError("Cannot write DAO impls to your project");
             }

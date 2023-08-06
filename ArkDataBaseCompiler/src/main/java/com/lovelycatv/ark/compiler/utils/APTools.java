@@ -11,7 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 public class APTools {
-
+    /**
+     * @param element type method or field
+     * @param annotations annotation(s) to be checked
+     * @return whether the element is annotated with the annotation(s)
+     */
     public static boolean containsAnnotation(Element element, Class<? extends Annotation>... annotations) {
         boolean found = false;
         for (Class<? extends Annotation> annotation : annotations) {
@@ -23,6 +27,10 @@ public class APTools {
         return found;
     }
 
+    /**
+     * @param classElement type
+     * @return all public abstract methods in element
+     */
     public static List<Element> getAbstractMethods(Element classElement) {
         List<Element> result = new ArrayList<>();
         for (Element element : classElement.getEnclosedElements()) {
@@ -36,6 +44,10 @@ public class APTools {
     }
 
 
+    /**
+     * @param typeMirror typeMirror
+     * @return whether the type of typeMirror is null
+     */
     public static boolean isVoid(TypeMirror typeMirror) {
         return typeMirror.toString().equals("void") || typeMirror.toString().equals(Void.class.getName());
     }
@@ -109,6 +121,20 @@ public class APTools {
         return getClassNameFromTypeMirror(a).equals(getClassNameFromTypeMirror(b));
     }
 
+    /**
+     * @param a toString() = java.util.List<com.lovelycatv.ark.test.User>
+     * @param b toString() = com.lovelycatv.ark.test.User OR java.util.List
+     * @return true
+     */
+    public static boolean isTheSimilarTypeMirror(TypeMirror a, TypeMirror b) {
+        return getClassNameFromTypeMirror(a).contains(getClassNameFromTypeMirror(b));
+    }
+
+    /**
+     * @param fieldElement targetFieldElement
+     * @param elements all elements in the class where the target field are
+     * @return
+     */
     public static List<Element> findBeanMethod(Element fieldElement, List<? extends Element> elements) {
         List<Element> result = new ArrayList<>();
         for (Element methodElement : elements) {

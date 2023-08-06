@@ -18,95 +18,14 @@ import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
 import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
 import com.squareup.javapoet.*;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class DAOProcessor extends AbstractDAOProcessor {
     public DAOProcessor(AbstractDatabaseProcessor databaseProcessor) {
         super(databaseProcessor);
-    }
-
-    @Override
-    public List<TypeSpec.Builder> start() throws ProcessorError {
-        this.determineSupportedParametersManager();
-
-        List<TypeSpec.Builder> result = new ArrayList<>();
-        ProcessableDatabase database = getDatabaseProcessor().getProcessableDatabase();
-        for (ProcessableDAO dao : database.getDaoController().getDAOList()) {
-            result.add(buildDAO(dao));
-        }
-
-        debugging();
-
-        return result;
-    }
-
-    // Define fields name constants
-    public static final String FIELD_DAO_DATABASE = "__db";
-    @Override
-    public TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError {
-        // Verify DAO
-        verifyDAO(processableDAO);
-
-        // Scan adapters
-        List<EntityAdapterInfo> entityAdapterInfos = scanAllUsedAdapters(processableDAO);
-
-        // Start build
-        String interfaceFullName = APTools.getClassNameFromTypeMirror(processableDAO.getDAOClassElement().asType());
-        TypeSpec.Builder daoImpl = TypeSpec.classBuilder(processableDAO.getFileName())
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(ClassName.get(StringX.getClassPathInFullName(interfaceFullName), StringX.getClassNameInFullName(interfaceFullName)));
-
-        // Adapters and Constructor
-        MethodSpec.Builder constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-
-        // Add ArkRelationalDatabase Field
-        // ArkRelationalDatabase<? extends RelationalDatabase>
-        Class<? extends RelationalDatabase> databaseManagerClass = super.getDatabaseProcessor().getDatabaseManagerClass();
-        ParameterizedTypeName relationalDatabaseTypeName = ParameterizedTypeName.get(ClassName.get(ArkRelationalDatabase.class), ClassName.get(databaseManagerClass));
-        daoImpl.addField(relationalDatabaseTypeName, FIELD_DAO_DATABASE, Modifier.PRIVATE, Modifier.FINAL);
-        final String PARAM_CONSTRUCTOR_DATABASE = "_db";
-        constructor.addParameter(relationalDatabaseTypeName, PARAM_CONSTRUCTOR_DATABASE);
-        constructor.addStatement("this.$L = $L", FIELD_DAO_DATABASE, PARAM_CONSTRUCTOR_DATABASE);
-
-        // Add Adapters
-        for (EntityAdapterInfo adapterInfo : entityAdapterInfos) {
-            adapterInfo.buildFiledList();
-            adapterInfo.buildAdapterAnonymousTypes(getDatabaseProcessor().getProcessableDatabase().getDataBaseType());
-            for (Map.Entry<Class<? extends Annotation>, FieldSpec> entry : adapterInfo.annotationWithFields.entrySet()) {
-                daoImpl.addField(entry.getValue());
-            }
-            // Init adapters in constructor
-            for (Map.Entry<Class<? extends Annotation>, TypeSpec> entry : adapterInfo.annotationWithAnonymousTypes.entrySet()) {
-                constructor.addStatement(String.format("this.%s = $L", adapterInfo.getFieldName(entry.getKey())), entry.getValue());
-            }
-        }
-
-        daoImpl.addMethod(constructor.build());
-
-        // Build typeConverters
-        for (ProcessableTypeConverter typeConverter : super.getDatabaseProcessor().getProcessableDatabase().getTypeConverterController().getTypeConverterList()) {
-            for (ProcessableTypeConverter.Converter converter : typeConverter.getTypeConverterList()) {
-                MethodSpec methodSpec = MethodSpec.methodBuilder(converter.getMethodNameInDAO())
-                        .addModifiers(Modifier.PRIVATE)
-                        .addParameter(ClassName.get(converter.getFrom()), "_from")
-                        .returns(ClassName.get(converter.getTo()))
-                        .addStatement("return $T.$L($L)", typeConverter.getTypeConverterType(), converter.getElement().getSimpleName(), "_from")
-                        .build();
-
-                daoImpl.addMethod(methodSpec);
-            }
-
-        }
-
-
-        return daoImpl;
     }
 
     @Override
@@ -132,7 +51,7 @@ public final class DAOProcessor extends AbstractDAOProcessor {
             if (!APTools.containsAnnotation(interfaceElement, Insert.class, Update.class, Delete.class)) {
                 continue;
             }
-            EntityAdapterInfo entityAdapterInfo = new EntityAdapterInfo(super.getSupportedParameterManager(),
+            EntityAdapterInfo entityAdapterInfo = new EntityAdapterInfo(super.getDatabaseProcessor(), super.getSupportedParameterManager(),
                     super.getDatabaseProcessor().getProcessableDatabase().getTypeConverterController().getTypeConverterList());
 
             ExecutableElement i = (ExecutableElement) interfaceElement;
@@ -164,7 +83,6 @@ public final class DAOProcessor extends AbstractDAOProcessor {
         }
         return result;
     }
-
 
     @Override
     protected void debugging() {
