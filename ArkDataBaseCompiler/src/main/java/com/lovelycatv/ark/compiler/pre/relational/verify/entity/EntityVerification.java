@@ -7,6 +7,10 @@ import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
 import com.lovelycatv.ark.compiler.pre.relational.verify.AbstractProcessableVerification;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
+import com.lovelycatv.ark.compiler.utils.APTools;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EntityVerification extends AbstractProcessableVerification<ProcessableEntity> {
     private final ProcessableTypeConverter.Controller typeConverterController;
@@ -19,6 +23,19 @@ public class EntityVerification extends AbstractProcessableVerification<Processa
     @Override
     public void verify() throws ProcessorException, ProcessorUnexpectedError {
         ProcessableEntity entity = getProcessableObject();
+        // General verification
+        {
+            List<String> tmpColumnNames = new ArrayList<>();
+            for (ProcessableEntity.EntityColumn column : entity.getEntityColumnList()) {
+                if (tmpColumnNames.contains(column.getColumnName())) {
+                    throw new ProcessorException(String.format("Entity %s has duplicated column %s",
+                            APTools.getClassNameFromTypeMirror(entity.getDeclaredEntityType().asElement().asType()), column.getColumnName()));
+                } else {
+                    tmpColumnNames.add(column.getColumnName());
+                }
+            }
+        }
+
         if (getDataBaseType() == DataBaseType.MYSQL) {
             mysqlVerification(entity);
         } else if (getDataBaseType() == DataBaseType.SQLITE) {

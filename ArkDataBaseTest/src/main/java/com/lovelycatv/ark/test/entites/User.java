@@ -17,6 +17,16 @@ public class User {
     private String password;
     @Column(columnName = "abc")
     private String abc;
+    @Column(columnName = "abcd")
+    private String test;
+
+    public String getTest() {
+        return test;
+    }
+
+    public void setTest(String test) {
+        this.test = test;
+    }
 
     public String getPassword() {
         return password;
