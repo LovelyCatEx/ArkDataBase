@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface Query {
     String sql() default "";
-    boolean onQuery() default false;
+    boolean executeOnly() default false;
 }
