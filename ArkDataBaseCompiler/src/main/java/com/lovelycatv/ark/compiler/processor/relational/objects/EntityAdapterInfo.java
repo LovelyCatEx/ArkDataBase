@@ -92,7 +92,7 @@ public class EntityAdapterInfo {
                 }
                 boolean usingTypeConverter = column.isAboutToTypeConverter(supportedParameterManager);
                 if (usingTypeConverter) {
-                    ProcessableTypeConverter.Converter converter = column.getTypeConverter(typeConverterList);
+                    ProcessableTypeConverter.Converter converter = column.getOutTypeConverter(typeConverterList);
                     bind.addStatement("$L.$L($L, $L.$L($L.$L()))", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(),
                             ProcessorVars.getTypeConverterClassname(this.databaseProcessor.getProcessableDatabase().getClassElement().getSimpleName().toString()), converter.getMethodNameInDAO(),
                             parameterName_bind_entity, column.getGetter().getMethodElement().getSimpleName().toString());

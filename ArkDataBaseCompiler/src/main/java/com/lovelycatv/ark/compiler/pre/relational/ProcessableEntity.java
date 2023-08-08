@@ -11,7 +11,6 @@ import com.lovelycatv.ark.compiler.pre.relational.sql.SQLiteBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.sql.IBaseSQLStatement;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.utils.APTools;
-import com.lovelycatv.ark.compiler.utils.StringX;
 import lombok.Data;
 
 import javax.lang.model.element.*;
@@ -189,7 +188,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
          */
         public TypeMirror getColumnType(SupportedParameterManager supportedParameterManager, List<ProcessableTypeConverter> typeConverters) {
             if (isAboutToTypeConverter(supportedParameterManager)) {
-                return getTypeConverter(typeConverters).getTo();
+                return getOutTypeConverter(typeConverters).getTo();
             } else {
                 return this.element.asType();
             }
@@ -207,7 +206,7 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
          * @param typeConverters registered type converters
          * @return find the typeConverter from @param typeConverters of this column
          */
-        public ProcessableTypeConverter.Converter getTypeConverter(List<ProcessableTypeConverter> typeConverters) {
+        public ProcessableTypeConverter.Converter getOutTypeConverter(List<ProcessableTypeConverter> typeConverters) {
             ProcessableTypeConverter.Converter found = null;
             out:
             for (ProcessableTypeConverter parentConverterObject : typeConverters) {
@@ -218,11 +217,25 @@ public final class ProcessableEntity extends AbstractProcessable implements IPro
                     }
                 }
             }
-            if (found != null) {
-                return found;
-            } else {
-                return null;
+            return found;
+        }
+
+        /**
+         * @param typeConverters registered type converters
+         * @return find the typeConverter from @param typeConverters of this column
+         */
+        public ProcessableTypeConverter.Converter getInTypeConverter(List<ProcessableTypeConverter> typeConverters) {
+            ProcessableTypeConverter.Converter found = null;
+            out:
+            for (ProcessableTypeConverter parentConverterObject : typeConverters) {
+                for (ProcessableTypeConverter.Converter inConverter : parentConverterObject.getInConverters()) {
+                    if (APTools.isTheSameTypeMirror(inConverter.getTo(), this.getElement().asType())) {
+                        found = inConverter;
+                        break out;
+                    }
+                }
             }
+            return found;
         }
 
     }

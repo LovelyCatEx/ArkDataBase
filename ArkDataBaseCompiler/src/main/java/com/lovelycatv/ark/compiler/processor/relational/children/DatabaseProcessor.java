@@ -127,7 +127,7 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     }
 
     @Override
-    protected void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError {
+    protected void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError, ProcessorException {
         List<TypeSpec.Builder> daoImpls = super.getDaoProcessor().start();
 
         for (TypeSpec.Builder daoImpl : daoImpls) {

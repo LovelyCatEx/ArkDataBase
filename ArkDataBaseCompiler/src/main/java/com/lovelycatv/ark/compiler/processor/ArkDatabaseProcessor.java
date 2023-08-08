@@ -6,6 +6,7 @@ import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.processor.relational.children.DatabaseProcessor;
+import com.lovelycatv.ark.compiler.utils.APTools;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -40,6 +41,9 @@ public class ArkDatabaseProcessor extends AbstractProcessor {
         this.processingEnvironment = processingEnv;
         this.filer = processingEnv.getFiler();
         this.messager = processingEnv.getMessager();
+
+        APTools.processingEnvironment = processingEnv;
+
         super.init(processingEnv);
     }
 

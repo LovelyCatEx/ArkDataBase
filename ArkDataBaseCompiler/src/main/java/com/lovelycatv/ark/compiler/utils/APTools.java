@@ -2,15 +2,69 @@ package com.lovelycatv.ark.compiler.utils;
 
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class APTools {
+
+    public static ProcessingEnvironment processingEnvironment;
+
+    public static List<? extends TypeMirror> getParameterizedType(TypeMirror typeMirror) {
+        if (typeMirror instanceof DeclaredType) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            return declaredType.getTypeArguments();
+        }
+        return null;
+    }
+
+    public static boolean isContains(TypeMirror a, TypeMirror b) {
+        return processingEnvironment.getTypeUtils().contains(a, b);
+    }
+
+    public static boolean isSubtype(TypeMirror a, TypeMirror b) {
+        return processingEnvironment.getTypeUtils().isSubtype(a, b);
+    }
+
+    /**
+     * @param a from
+     * @param b to
+     * @return can a be assigned to b
+     */
+    public static boolean isAssignable(TypeMirror a, TypeMirror b) {
+        return processingEnvironment.getTypeUtils().isAssignable(a, b);
+    }
+
+    public static TypeElement getTypeByName(String name) {
+        return processingEnvironment.getElementUtils().getTypeElement(name);
+    }
+
+    public static TypeElement getTypeByClass(Class<?> aClass) {
+        return getTypeByName(aClass.getName());
+    }
+
+    public static boolean isListWithoutParameterizedTypes(TypeMirror typeMirror) {
+        String className = APTools.getClassNameFromTypeMirror(typeMirror);
+        List<? extends TypeMirror> parameterizedType = getParameterizedType(typeMirror);
+        if (parameterizedType != null) {
+            className = className.replace("<","");
+            className = className.replace(">","");
+            className = className.replace(",","");
+            for (TypeMirror mirror : parameterizedType) {
+                className = className.replace(APTools.getClassNameFromTypeMirror(mirror),"");
+            }
+        }
+        List<String> tmp = new ArrayList<>();
+        tmp.add(List.class.getName());
+        tmp.add(ArrayList.class.getName());
+        tmp.add(LinkedList.class.getName());
+        tmp.add(Vector.class.getName());
+        return tmp.contains(className);
+    }
+
     /**
      * @param element type method or field
      * @param annotations annotation(s) to be checked

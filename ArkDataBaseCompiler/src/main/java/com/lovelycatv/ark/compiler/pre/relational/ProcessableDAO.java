@@ -1,5 +1,6 @@
 package com.lovelycatv.ark.compiler.pre.relational;
 
+import com.lovelycatv.ark.common.annotations.common.Query;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.SupportedParameterManager;
 import com.lovelycatv.ark.compiler.pre.relational.verify.parameter.object.JavaSupportedType;
 import com.lovelycatv.ark.compiler.utils.APTools;
@@ -56,6 +57,15 @@ public class ProcessableDAO extends AbstractProcessable {
         return result;
     }
 
+    public List<DAOMethod> getQueryMethods() {
+        List<DAOMethod> result = new ArrayList<>();
+        for (DAOMethod daoMethod : getDaoMethodList()) {
+            if (daoMethod.getAnnotations().get(0).annotationType().getName().equals(Query.class.getName())) {
+                result.add(daoMethod);
+            }
+        }
+        return result;
+    }
     public List<DAOMethod> getDaoMethodList() {
         return daoMethodList;
     }
@@ -91,5 +101,6 @@ public class ProcessableDAO extends AbstractProcessable {
         private Element element;
         private List<Annotation> annotations;
         private boolean adapterMethod;
+
     }
 }

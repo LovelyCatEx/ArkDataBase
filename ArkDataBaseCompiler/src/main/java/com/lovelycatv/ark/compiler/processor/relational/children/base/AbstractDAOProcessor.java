@@ -1,5 +1,6 @@
 package com.lovelycatv.ark.compiler.processor.relational.children.base;
 
+import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableDAO;
@@ -24,7 +25,7 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
         this.databaseProcessor = databaseProcessor;
     }
 
-    public List<TypeSpec.Builder> start() throws ProcessorError, ProcessorUnexpectedError {
+    public List<TypeSpec.Builder> start() throws ProcessorError, ProcessorUnexpectedError, ProcessorException {
         this.determineSupportedParametersManager();
 
         List<TypeSpec.Builder> result = new ArrayList<>();
@@ -40,7 +41,7 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
 
     // Define fields name constants
     public static final String FIELD_DAO_DATABASE = "__db";
-    public TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError, ProcessorUnexpectedError {
+    public TypeSpec.Builder buildDAO(ProcessableDAO processableDAO) throws ProcessorError, ProcessorUnexpectedError, ProcessorException {
         // Verify DAO
         verifyDAO(processableDAO);
 
@@ -82,6 +83,11 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
             daoImpl.addMethod(method.build());
         }
 
+        // Add query methods
+        for (MethodSpec.Builder method : buildAllQueryMethods(processableDAO)) {
+            daoImpl.addMethod(method.build());
+        }
+
         return daoImpl;
     }
 
@@ -90,6 +96,8 @@ public abstract class AbstractDAOProcessor extends AbstractProcessor {
     public abstract List<EntityAdapterInfo> scanAllUsedAdapters(ProcessableDAO processableDAO) throws ProcessorError;
 
     public abstract List<MethodSpec.Builder> buildAllAdapterMethods(ProcessableDAO processableDAO) throws ProcessorUnexpectedError;
+
+    public abstract List<MethodSpec.Builder> buildAllQueryMethods(ProcessableDAO processableDAO0) throws ProcessorUnexpectedError, ProcessorException;
 
     public final AbstractDatabaseProcessor getDatabaseProcessor() {
         return databaseProcessor;

@@ -167,7 +167,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
 
     protected abstract void startTypeConverterProcessor() throws ProcessorUnexpectedError;
 
-    protected abstract void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError;
+    protected abstract void startDAOProcessor() throws ProcessorError, ProcessorUnexpectedError, ProcessorException;
 
     protected abstract List<CodeBlock> getCodeInInitDatabase() throws ProcessorError;
 
