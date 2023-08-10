@@ -47,7 +47,7 @@ public class Ark {
         }
 
         public RelationalDatabaseBuilder sqlite(String databasePath) {
-            this.database = database;
+            this.database = databasePath;
             return this;
         }
 
