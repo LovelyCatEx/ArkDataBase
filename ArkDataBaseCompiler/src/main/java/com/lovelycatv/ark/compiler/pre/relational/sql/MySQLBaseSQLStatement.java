@@ -81,14 +81,20 @@ public class MySQLBaseSQLStatement implements IBaseSQLStatement {
         }
 
         String primaryKey = processableEntity.getPrimaryKey();
-        String setBody = "";
+        StringBuilder setBody = new StringBuilder();
         int index = 1;
         for (ProcessableEntity.EntityColumn column : columns) {
-            setBody = String.format("`%s` = ?, ", column.getColumnName());
+            if (column.isPrimaryKey()) {
+                continue;
+            }
+            setBody.append(String.format("`%s` = ?, ", column.getColumnName()));
             standardSQLStatement.getSlotWithColumnName().put(index, column.getColumnName());
             index++;
         }
-        setBody = setBody.substring(0, setBody.length() - 2);
+        setBody = new StringBuilder(setBody.substring(0, setBody.length() - 2));
+
+        standardSQLStatement.getSlotWithColumnName().put(index, primaryKey);
+
         standardSQLStatement.setSql(String.format(result, processableEntity.getTableName(), setBody, primaryKey));
         return standardSQLStatement;
     }
@@ -99,7 +105,7 @@ public class MySQLBaseSQLStatement implements IBaseSQLStatement {
         String result = "DELETE FROM `%s` WHERE `%s` = ?";
 
         if (!processableEntity.hasPrimaryKey()) {
-            throw new ProcessorError(String.format("To use the @Update, you must define a primary key in entity %s", APTools.getClassNameFromTypeMirror(processableEntity.getDeclaredEntityType())));
+            throw new ProcessorError(String.format("To use the @Delete, you must define a primary key in entity %s", APTools.getClassNameFromTypeMirror(processableEntity.getDeclaredEntityType())));
         }
 
         String primaryKey = processableEntity.getPrimaryKey();

@@ -112,7 +112,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
                 initDatabaseInside.addStatement("super.databaseManager = new $T((String) super.getArgs()[0], " +
                         "(Integer) super.getArgs()[1], (String) super.getArgs()[2], (String) super.getArgs()[3], (String) super.getArgs()[4])", relationalDatabaseClass);
             } else if (databaseAnnotation.dataBaseType() == DataBaseType.SQLITE) {
-                initDatabaseInside.addStatement("super.databaseManager = new $T((String) super.getArgs()[4]", relationalDatabaseClass);
+                initDatabaseInside.addStatement("super.databaseManager = new $T((String) super.getArgs()[4])", relationalDatabaseClass);
             }
 
             for (CodeBlock codeBlock : getCodeInInitDatabase()) {
