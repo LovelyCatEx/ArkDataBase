@@ -15,18 +15,6 @@ public class User {
     private int[] username;
     @Column(columnName = "password")
     private String password;
-    @Column(columnName = "abc")
-    private String abc;
-    @Column(columnName = "abcd")
-    private String test;
-
-    public String getTest() {
-        return test;
-    }
-
-    public void setTest(String test) {
-        this.test = test;
-    }
 
     public String getPassword() {
         return password;
@@ -38,14 +26,6 @@ public class User {
 
     public int[] getUsername() {
         return username;
-    }
-
-    public void setAbc(String abc) {
-        this.abc = abc;
-    }
-
-    public String getAbc() {
-        return abc;
     }
 
     public void setUsername(int[] username) {

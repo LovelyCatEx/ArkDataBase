@@ -6,11 +6,9 @@ import com.lovelycatv.ark.common.enums.DataBaseType;
 import com.lovelycatv.ark.runtime.ArkDatabase;
 import com.lovelycatv.ark.test.dao.UserDAO;
 import com.lovelycatv.ark.test.entites.User;
-import com.lovelycatv.ark.test.entites.Work;
 
 @ArkDebug(enabled = false)
-@Database(dataBaseType = DataBaseType.MYSQL, entities = {User.class, Work.class}, typeConverters = {UserTypeConverters.class}, version = 1)
-
+@Database(dataBaseType = DataBaseType.MYSQL, entities = {User.class}, typeConverters = {UserTypeConverters.class}, version = 1)
 public abstract class MyDatabase extends ArkDatabase {
     public abstract UserDAO userDAO();
 }

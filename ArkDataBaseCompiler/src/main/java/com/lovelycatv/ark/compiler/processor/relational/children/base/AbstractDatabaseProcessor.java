@@ -108,6 +108,13 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC);
 
+            if (databaseAnnotation.dataBaseType() == DataBaseType.MYSQL) {
+                initDatabaseInside.addStatement("super.databaseManager = new $T((String) super.getArgs()[0], " +
+                        "(Integer) super.getArgs()[1], (String) super.getArgs()[2], (String) super.getArgs()[3], (String) super.getArgs()[4])", relationalDatabaseClass);
+            } else if (databaseAnnotation.dataBaseType() == DataBaseType.SQLITE) {
+                initDatabaseInside.addStatement("super.databaseManager = new $T((String) super.getArgs()[4]", relationalDatabaseClass);
+            }
+
             for (CodeBlock codeBlock : getCodeInInitDatabase()) {
                 initDatabaseInside.addStatement(codeBlock);
             }
@@ -130,7 +137,8 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
         for (ProcessableDAO processableDAO : getProcessableDatabase().getDaoController().getDAOList()) {
             final String DAOFileName = processableDAO.getFileName();
             final String FIELD_DAO = "_" + DAOFileName;
-            final ClassName daoClassName = ClassName.get(ProcessorVars.getDAOPackageName(this.getProcessableDatabase().getClassElement().getSimpleName().toString()), DAOFileName);
+            final TypeName daoClassName = ClassName.get(processableDAO.getDAOClassElement().asType());
+            final TypeName daoImplClassName = ClassName.get(ProcessorVars.getDAOPackageName(getProcessableDatabase().getClassElement().getSimpleName().toString()), DAOFileName);
             FieldSpec daoImpl = FieldSpec.builder(daoClassName, FIELD_DAO)
                     .addModifiers(Modifier.PRIVATE, Modifier.VOLATILE)
                     .build();
@@ -142,7 +150,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
                     .addModifiers(Modifier.PUBLIC)
                     .returns(daoClassName)
                     .beginControlFlow("if(this.$L == null)", FIELD_DAO)
-                    .addStatement("this.$L = new $T(this.getDatabase())", FIELD_DAO, daoClassName)
+                    .addStatement("this.$L = new $T(this.getDatabase())", FIELD_DAO, daoImplClassName)
                     .endControlFlow()
                     .addStatement("return this.$L", FIELD_DAO)
                     .build();
