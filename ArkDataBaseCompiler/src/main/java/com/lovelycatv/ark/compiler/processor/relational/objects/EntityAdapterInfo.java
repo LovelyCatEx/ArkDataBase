@@ -79,6 +79,7 @@ public class EntityAdapterInfo {
                     throw new ProcessorError(String.format("Could not find column when trying to process adapters in %s",
                             targetEntity.getDeclaredEntityType().asElement().asType().toString()));
                 }
+
                 String methodName = "";
                 for (Map.Entry<Class<?>, String> tmpEntry : ArkJDBC.getJavaTypeClassWithBindMethodNameMap().entrySet()) {
                     if (tmpEntry.getKey().getName().equals(column.getColumnType(supportedParameterManager, typeConverterList).toString())) {
@@ -90,6 +91,7 @@ public class EntityAdapterInfo {
                     throw new ProcessorError(String.format("Could not find binding method name of PreparedStatement when trying to process adapters in %s",
                             targetEntity.getDeclaredEntityType().asElement().asType().toString()));
                 }
+
                 boolean usingTypeConverter = column.isAboutToTypeConverter(supportedParameterManager);
                 if (usingTypeConverter) {
                     ProcessableTypeConverter.Converter converter = column.getOutTypeConverter(typeConverterList);

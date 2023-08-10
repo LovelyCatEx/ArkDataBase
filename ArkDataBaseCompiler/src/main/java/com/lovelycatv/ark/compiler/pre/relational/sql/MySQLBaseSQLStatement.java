@@ -59,7 +59,7 @@ public class MySQLBaseSQLStatement implements IBaseSQLStatement {
                 continue;
             }
             values.append("`").append(column.getColumnName()).append("`, ");
-            placeHolders.append(", ");
+            placeHolders.append("?, ");
             standardSQLStatement.getSlotWithColumnName().put(index, column.getColumnName());
             index++;
         }
