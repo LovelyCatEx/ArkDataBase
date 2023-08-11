@@ -1,10 +1,10 @@
 package com.lovelycatv.ark.compiler.processor.relational.objects;
 
+import com.lovelycatv.ark.ArkVars;
 import com.lovelycatv.ark.common.annotations.common.Delete;
 import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Update;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.ProcessorVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableEntity;
 import com.lovelycatv.ark.compiler.pre.relational.ProcessableTypeConverter;
@@ -96,7 +96,7 @@ public class EntityAdapterInfo {
                 if (usingTypeConverter) {
                     ProcessableTypeConverter.Converter converter = column.getOutTypeConverter(typeConverterList);
                     bind.addStatement("$L.$L($L, $L.$L($L.$L()))", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(),
-                            ProcessorVars.getTypeConverterClassname(this.databaseProcessor.getProcessableDatabase().getClassElement().getSimpleName().toString()), converter.getMethodNameInDAO(),
+                            ArkVars.getTypeConverterClassname(this.databaseProcessor.getProcessableDatabase().getClassElement().getSimpleName().toString()), converter.getMethodNameInDAO(),
                             parameterName_bind_entity, column.getGetter().getMethodElement().getSimpleName().toString());
                 } else {
                     bind.addStatement("$L.$L($L, $L.$L())", parameterName_bind_preparedStatement, methodName, stmtEntry.getKey(), parameterName_bind_entity,

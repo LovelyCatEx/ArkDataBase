@@ -1,6 +1,6 @@
 package com.lovelycatv.ark.compiler.processor.relational.children.base;
 
-import com.lovelycatv.ark.compiler.ProcessorVars;
+import com.lovelycatv.ark.ArkVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -18,7 +18,7 @@ public abstract class AbstractTypeConverterProcessor extends AbstractProcessor {
     public TypeSpec.Builder start() throws ProcessorUnexpectedError {
         this.determineSupportedParametersManager();
 
-        TypeSpec.Builder typeSpec = TypeSpec.classBuilder(ProcessorVars.getTypeConverterClassname(
+        TypeSpec.Builder typeSpec = TypeSpec.classBuilder(ArkVars.getTypeConverterClassname(
                 this.databaseProcessor.getProcessableDatabase().getClassElement().getSimpleName().toString()))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 

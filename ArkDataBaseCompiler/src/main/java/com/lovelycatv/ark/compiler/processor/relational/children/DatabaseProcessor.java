@@ -1,9 +1,9 @@
 package com.lovelycatv.ark.compiler.processor.relational.children;
 
+import com.lovelycatv.ark.ArkVars;
 import com.lovelycatv.ark.common.annotations.Dao;
 import com.lovelycatv.ark.common.annotations.Database;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.ProcessorVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
@@ -119,7 +119,7 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
     protected void startTypeConverterProcessor() throws ProcessorUnexpectedError {
         TypeSpec.Builder start = super.getTypeConverterProcessor().start();
         try {
-            JavaFile.builder(ProcessorVars.getPackageName(super.getProcessableDatabase().getClassElement().getSimpleName().toString()),
+            JavaFile.builder(ArkVars.getPackageName(super.getProcessableDatabase().getClassElement().getSimpleName().toString()),
                     start.build()).build().writeTo(super.getProcessor().getFiler());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -132,7 +132,7 @@ public final class DatabaseProcessor extends AbstractDatabaseProcessor {
 
         for (TypeSpec.Builder daoImpl : daoImpls) {
             try {
-                JavaFile.builder(ProcessorVars.getDAOPackageName(super.getProcessableDatabase().getClassElement().getSimpleName().toString()),
+                JavaFile.builder(ArkVars.getDAOPackageName(super.getProcessableDatabase().getClassElement().getSimpleName().toString()),
                         daoImpl.build()).build().writeTo(super.getProcessor().getFiler());
             } catch (IOException e) {
                 throw new ProcessorError("Cannot write DAO impls to your project");

@@ -12,12 +12,13 @@ repositories {
 
 dependencies {
 
-    annotationProcessor fileTree(includes: ['ArkDataBaseCompiler*'], dir: 'libs/apt')
-    implementation fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs/common')
+    //annotationProcessor fileTree(includes: ['ArkDataBaseCompiler*'], dir: 'libs/apt')
+    //implementation fileTree(includes: ['ArkDataBaseRuntime*'], dir: 'libs/common')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    //implementation 'com.lovelycatv.ark:runtime:1.1.2'
+    implementation 'com.lovelycatv.ark:runtime:latest.release'
+    annotationProcessor  'com.lovelycatv.ark:compiler:latest.release'
 }
 
 test {

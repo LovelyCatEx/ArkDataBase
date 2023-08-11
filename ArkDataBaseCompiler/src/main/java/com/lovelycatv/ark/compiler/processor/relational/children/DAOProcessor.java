@@ -1,10 +1,10 @@
 package com.lovelycatv.ark.compiler.processor.relational.children;
 
+import com.lovelycatv.ark.ArkVars;
 import com.lovelycatv.ark.common.annotations.common.Delete;
 import com.lovelycatv.ark.common.annotations.common.Insert;
 import com.lovelycatv.ark.common.annotations.common.Query;
 import com.lovelycatv.ark.common.annotations.common.Update;
-import com.lovelycatv.ark.compiler.ProcessorVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
@@ -23,7 +23,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
@@ -253,7 +252,7 @@ public final class DAOProcessor extends AbstractDAOProcessor {
                             ProcessableTypeConverter.Converter converter = column.getInTypeConverter(typeConverterList);
                             methodSpec.addStatement("$L.$L($L.$L($L.$L($S)))",
                                     varName_resultEntity, column.getSetter().getMethodElement().getSimpleName(),
-                                    ProcessorVars.getTypeConverterClassname(super.getDatabaseProcessor().getProcessableDatabase().getClassElement().getSimpleName().toString()),
+                                    ArkVars.getTypeConverterClassname(super.getDatabaseProcessor().getProcessableDatabase().getClassElement().getSimpleName().toString()),
                                     converter.getMethodNameInDAO(),
                                     varName_resultSet, resultSetGetterMethodName, column.getColumnName());
                         } else {

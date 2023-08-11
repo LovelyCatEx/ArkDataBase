@@ -7,20 +7,26 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'kotlin'
 apply plugin: 'java'
 
 group = 'com.lovelycatv.ark.compiler'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
+    maven { url "https://repo.maven.apache.org/maven2" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
@@ -34,7 +40,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-    implementation 'com.lovelycatv.ark:runtime:1.1.2'
+    implementation 'com.lovelycatv.ark:runtime:1.1.3'
 }
 
 test {
@@ -48,4 +54,82 @@ shadowJar {
 }
 kotlin {
     jvmToolchain(11)
+}
+
+sourceSets.main.resources.srcDirs = ["src/main/java","src/main/resources"]
+
+jar {
+    enabled = true
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+    duplicatesStrategy 'exclude'
+}
+
+task javaDocJar(type: Jar) {
+    from javadoc
+    archiveClassifier.set('javadoc')
+}
+
+println("Project group: " + project.group)
+println("Project name: " + project.name)
+println("Project version: " + project.version)
+
+publishing {
+    publications {
+        mavenJar(MavenPublication) {
+            artifact sourcesJar
+            artifact javaDocJar
+            groupId 'com.lovelycatv.ark'
+            artifactId 'compiler'
+            version project.version
+            from components.java
+            pom {
+                name = project.getProperties().get("pom-name")
+                description = project.getProperties().get("pom-description")
+                url = project.getProperties().get("pom-url")
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        name = project.getProperties().get("developer-name")
+                        email = project.getProperties().get("developer-email")
+                    }
+                }
+                scm {
+                    url = project.getProperties().get("repositoriy-url")
+                    connection = 'scm:git:' + project.getProperties().get("repositoriy-url") + '.git'
+                    developerConnection = 'scm:git:' + project.getProperties().get("repositoriy-url") + '.git'
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJar
+    }
+
+    repositories {
+        maven {
+            name project.getProperties().get("maven-name")
+            // url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            // url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = project.getProperties().get("sonatype-username")
+                password = project.getProperties().get("sonatype-password")
+            }
+        }
+    }
+}
+
+javadoc {
+    options.encoding = "UTF-8"
+    failOnError = false
 }

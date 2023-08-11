@@ -1,9 +1,9 @@
 package com.lovelycatv.ark.compiler.processor.relational.children.base;
 
+import com.lovelycatv.ark.ArkVars;
 import com.lovelycatv.ark.common.annotations.ArkDebug;
 import com.lovelycatv.ark.common.annotations.Database;
 import com.lovelycatv.ark.common.enums.DataBaseType;
-import com.lovelycatv.ark.compiler.ProcessorVars;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorException;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorUnexpectedError;
 import com.lovelycatv.ark.compiler.exceptions.ProcessorError;
@@ -16,7 +16,6 @@ import com.lovelycatv.ark.compiler.processor.ArkDatabaseProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.children.DAOProcessor;
 import com.lovelycatv.ark.compiler.processor.relational.children.TypeConverterProcessor;
 import com.lovelycatv.ark.runtime.ArkRelationalDatabase;
-import com.lovelycatv.ark.runtime.constructures.base.relational.MySQLManager;
 import com.lovelycatv.ark.runtime.constructures.base.relational.RelationalDatabase;
 import com.squareup.javapoet.*;
 
@@ -138,7 +137,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
             final String DAOFileName = processableDAO.getFileName();
             final String FIELD_DAO = "_" + DAOFileName;
             final TypeName daoClassName = ClassName.get(processableDAO.getDAOClassElement().asType());
-            final TypeName daoImplClassName = ClassName.get(ProcessorVars.getDAOPackageName(getProcessableDatabase().getClassElement().getSimpleName().toString()), DAOFileName);
+            final TypeName daoImplClassName = ClassName.get(ArkVars.getDAOPackageName(getProcessableDatabase().getClassElement().getSimpleName().toString()), DAOFileName);
             FieldSpec daoImpl = FieldSpec.builder(daoClassName, FIELD_DAO)
                     .addModifiers(Modifier.PRIVATE, Modifier.VOLATILE)
                     .build();
@@ -159,7 +158,7 @@ public abstract class AbstractDatabaseProcessor extends AbstractProcessor {
         }
 
         try {
-            JavaFile.builder(ProcessorVars.getPackageName(this.getProcessableDatabase().getClassElement().getSimpleName().toString()),
+            JavaFile.builder(ArkVars.getPackageName(this.getProcessableDatabase().getClassElement().getSimpleName().toString()),
                     databaseImpl.build()).build().writeTo(getProcessor().getFiler());
         } catch (IOException e) {
             throw new ProcessorError(String.format("Cannot write database impl (%s) to your project", annotatedElement.asType().toString()));

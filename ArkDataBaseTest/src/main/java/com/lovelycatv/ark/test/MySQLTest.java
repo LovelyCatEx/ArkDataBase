@@ -28,7 +28,7 @@ public class MySQLTest {
     public static void mysql_printAllUsers() {
         User[] allUsers = database.userDAO().getAllUsers();
         for (User user : allUsers) {
-            System.out.println(user.getId() + " : " + user.getUsername() + " : " + user.getPassword() + " : " + user.getSex().toString() + " : " + user.getBirthday());
+            System.out.println(user.getId() + " : " + user.getUsername() + " : " + user.getPassword() + " : " + user.getBirthday());
         }
     }
 
